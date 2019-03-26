@@ -11,13 +11,12 @@ parser.add_argument('--debug', type=bool, default=False, help='Set debug mode')
 
 args = parser.parse_args()
 
-# data_path = '/gwteray/users/govoni/OneLeptonSkims/VBS_semileptonic_signal_summer16/lepSel__MCWeights__bSFLpTEffMulti__cleanTauMC__l1tightChain__LepTrgFix__dorochester__formulasMC/'
 data_path = args.data_path
 nevents = args.nevents
 debug = args.debug
 file_list = os.listdir(data_path)
 
-print 'file iev no_t_no_tbar t tbar t_tbar'
+print 'file tot_events no_t_no_tbar t tbar t_tbar'
 
 for f in sorted(file_list):
     file = rt.TFile(data_path + '/' + f)
