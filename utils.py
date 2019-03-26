@@ -4,20 +4,43 @@ from math import cosh
 from itertools import combinations
 from operator import itemgetter
 
-def get_quadrimomenta(pts, etas, phis, debug=False):
+def get_quadrimomenta(pts, etas, phis, nvec, debug=False):
     vectors = []
-    for pt,eta,phi in zip(pts, etas, phis):
+    for i in range(nvec):
+        pt, eta, phi = pts[i], etas[i], phis[i]
         if debug:
             print "pt:", pt ," eta:", eta, " phi:", phi
-        if pt <= 0.:
-            #reached end of event
-            return vectors
-        p = pt * cosh(eta)
+        if abs(eta)>10:
+            continue
+        else:
+            p = pt * cosh(eta)
         #assume m =0, p = E
         v = TLorentzVector()
         v.SetPtEtaPhiE(pt, eta, phi, p)
         vectors.append(v)
     return vectors
+
+
+def get_quadrimomentum(pt, eta, phi):
+        p = pt * cosh(eta)
+        v = TLorentzVector()
+        v.SetPtEtaPhiE(pt, eta, phi, p)
+        return v
+
+def get_hard_partons(event, debug=False):
+    partons = []
+    pids = []
+    for i, (pt, eta, phi, pid, isHard) in enumerate(
+            zip(event.std_vector_partonGen_pt,event.std_vector_partonGen_eta,
+                event.std_vector_partonGen_phi, event.std_vector_partonGen_pid,
+                event.std_vector_partonGen_isHardProcess)):
+        if isHard==1 and abs(eta) < 10 :
+            if debug:
+                print "pid: ", pid, " pt:", pt ," eta:", eta, " phi:", phi
+            vec = get_quadrimomentum(pt, eta, phi)
+            partons.append(vec)
+            pids.append(int(pid))
+    return partons, pids
 
 
 def mjj_pairs(vectors):

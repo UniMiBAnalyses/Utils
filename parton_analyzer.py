@@ -1,7 +1,6 @@
-import utils 
 import ROOT as rt  
 import sys  
-
+import utils
 
 file = rt.TFile(sys.argv[1])
 tree = file.Get("latino")
@@ -10,24 +9,26 @@ nevents = 10
 if len(sys.argv) > 2:
     nevents = int(sys.argv[2])
 
-
+debug = False 
+if len(sys.argv) > 3:
+    debug = bool(sys.argv[3])
 
 
 iev = 0
 
 for event in tree:
     print "> event: ", iev
-    ids = [int(pid) for pid in event.std_vector_partonGen_pid if pid!=-9999]
-    print "partons PID: ",ids
-    partons = utils.get_quadrimomenta(event.std_vector_partonGen_pt, 
-                                      event.std_vector_partonGen_eta, 
-                                      event.std_vector_partonGen_phi, debug=True)
-    
+    partons, pids = utils.get_hard_partons(event, debug)
 
-    #invariant masses
-    masses = mjj_pairs(partons)
-    print masses
+    print "partons PID: ", pids
+    
+    mass_pairs = utils.mjj_pairs(partons)
+    eta_pairs = utils.deltaeta_pairs(partons)
+    print "Mass pairs"
+    print mass_pairs
+    print "Eta pairs"
+    print eta_pairs
 
     iev+=1
-    if iev> nevents:
+    if iev>= nevents:
         break
