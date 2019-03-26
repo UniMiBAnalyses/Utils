@@ -31,15 +31,17 @@ def get_hard_partons(event, debug=False):
     partons = []
     pids = []
     for i, (pt, eta, phi, pid, isHard) in enumerate(
-            zip(event.std_vector_partonGen_pt,event.std_vector_partonGen_eta,
+            zip(event.std_vector_partonGen_pt, event.std_vector_partonGen_eta,
                 event.std_vector_partonGen_phi, event.std_vector_partonGen_pid,
                 event.std_vector_partonGen_isHardProcess)):
         if isHard==1 and abs(eta) < 10 :
-            if debug:
-                print "pid: ", pid, " pt:", pt ," eta:", eta, " phi:", phi
             vec = get_quadrimomentum(pt, eta, phi)
-            partons.append(vec)
-            pids.append(int(pid))
+            # check if different from the previous one
+            if len(partons)==0 or vec != partons[-1]:
+                if debug:
+                    print "pid: ", pid, " pt:", pt ," eta:", eta, " phi:", phi
+                partons.append(vec)
+                pids.append(int(pid))
     return partons, pids
 
 

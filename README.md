@@ -8,6 +8,6 @@ Script to analyze the partons quadrimomenta at Gen level from latino trees.
 
 How to use:
 ```
-python parton_analyzer.py  latino_tree_file.root [nevents=10]
+python parton_analyzer.py  latino_tree_file.root [nevents=10] [1 debug=True]
 ```
 
