@@ -21,6 +21,7 @@ for event in tree:
     partons, pids = utils.get_hard_partons(event, debug)
 
     print "partons PID: ", pids
+    print "partons: ", partons
     
     mass_pairs = utils.mjj_pairs(partons)
     eta_pairs = utils.deltaeta_pairs(partons)
