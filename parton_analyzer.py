@@ -28,21 +28,33 @@ for event in tree:
     if 6 in pids or -6 in pids:
         continue
 
+    if len(partons) != 4:
+        print ">>>> Problem! Event not with only 4 partons!!!! <<<<"
+
     print "> event: ", iev
     iev+=1
     print "partons PID: ", pids
-    print "partons: ", partons
 
     results, flag = utils.associate_vectors(jets, partons, args.radius)
     print results, flag
 
     # get the pair nearest  to W or Z mass
     vpair = utils.nearest_masses_pair(partons, [80.385, 91.1876])
-    print(vpair)
-    v_partons = [partons.pop(vpair[0]), partons.pop(vpair[1]-1)]
+    vbspair = [i for i in range(4) if not i in vpair]
+
+    # Now we have the index of partons in the list of partons
+    # associated with W or Z boson and VBS jets
     
-    if flag == 0:
-        pass
+    print "Vparton", vpair
+    print "VBS partons", vbspair
+    
+    if flag ==0:
+        # using the results from association we can get
+        # the parton-associated jets
+        vjets = [ results[0][iparton]  for iparton in vpair]
+        vbs_jets =  [ results[0][iparton]  for iparton in vbspair]
+        print "Vjets", vjets
+        print "VBS_jets", vbs_jets
 
     
     if iev>= nevents:
