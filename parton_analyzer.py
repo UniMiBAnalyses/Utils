@@ -1,34 +1,51 @@
 import ROOT as rt  
 import sys  
 import utils
+import argparse
 
-file = rt.TFile(sys.argv[1])
+parser = argparse.ArgumentParser(description='Count how many t and tbar are present in every event')
+parser.add_argument('data_path', type=str, help='All the files in this directory will be analyzed')
+parser.add_argument('--nevents', type=int, default=1, help='How many events per file should be analysed. Set to a negative value to include all events')
+parser.add_argument('--debug', type=bool, default=False, help='Set debug mode')
+parser.add_argument('--radius', type=float, default=0.8, help="Radius from jet")
+
+args = parser.parse_args()
+
+file = rt.TFile(args.data_path)
 tree = file.Get("latino")
 
-nevents = 10
-if len(sys.argv) > 2:
-    nevents = int(sys.argv[2])
-
-debug = False 
-if len(sys.argv) > 3:
-    debug = bool(sys.argv[3])
-
+nevents = args.nevents
+debug = args.debug
 
 iev = 0
 
 for event in tree:
-    print "> event: ", iev
+
     partons, pids = utils.get_hard_partons(event, debug)
+    jets = utils.get_jets(event, debug)
 
-    print "partons PID: ", pids
-    
-    mass_pairs = utils.mjj_pairs(partons)
-    eta_pairs = utils.deltaeta_pairs(partons)
-    print "Mass pairs"
-    print mass_pairs
-    print "Eta pairs"
-    print eta_pairs
+    # Remove top events
+    if 6 in pids or -6 in pids:
+        continue
 
+    print "> event: ", iev
     iev+=1
+    print "partons PID: ", pids
+
+    mass_pairs = utils.mjj_pairs(partons)
+    print "partons mass pairs", mass_pairs
+
+    results, flag = utils.associate_vectors(jets, partons, args.radius)
+    print results, flag
+
+    # Get pair of partons nearest to 
+    # get the pair nearest  to W or Z mass
+    vpair = utils.nearest_masses_pair(partons, [80.385, 91.1876])
+    print(vpair)
+    v_partons = [partons.pop(vpair[0]), partons.pop(vpair[1]-1)]
+    
+    # Jet matching
+
+    
     if iev>= nevents:
         break
