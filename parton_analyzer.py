@@ -31,7 +31,8 @@ for event in tree:
     print "> event: ", iev
     iev+=1
     print "partons PID: ", pids
-
+    print "partons: ", partons
+    
     mass_pairs = utils.mjj_pairs(partons)
     print "partons mass pairs", mass_pairs
 

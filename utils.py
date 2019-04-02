@@ -159,7 +159,17 @@ def nearest_masses_pair(vectors, masses):
     l = sorted(l, key=itemgetter(1))
     return l[0][0]
 
-    
+def mass_of_nearest_mass_pair(vectors, mass):
+    ''' Returns mass of the pair of vectors with invariant mass nearest to 
+    the given mass'''
+    l = []
+    pair_mass = 0
+    for i ,k  in combinations(range(len(vectors)),2):
+        pair_mass = (vectors[i]+ vectors[k]).M()
+        l.append(([i,k], abs(mass - pair_mass ), pair_mass))  
+    l = sorted(l, key=itemgetter(1))
+    return l[0][2]
+
 def nearest_R_pair(vectors):
     l = []
     for i ,k  in combinations(range(len(vectors)),2):
