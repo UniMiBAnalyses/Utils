@@ -2,54 +2,93 @@ import ROOT as rt
 import sys  
 import utils
 import argparse
+import os
+import multiprocessing
+from functools import partial
+from contextlib import contextmanager
 
-parser = argparse.ArgumentParser(description='Parton Analyzer, jet pairing')
-parser.add_argument('data_path', type=str, help='All the files in this directory will be analyzed')
-parser.add_argument('--nevents', type=int, default=1, help='How many events per file should be analysed. Set to a negative value to include all events')
-parser.add_argument('--debug', type=bool, default=False, help='Set debug mode')
-parser.add_argument('--radius', type=float, default=0.8, help="Radius from jet")
+rt.gROOT.SetBatch(True)
 
-args = parser.parse_args()
+@contextmanager
+def poolcontext(*args, **kwargs):
+    pool = multiprocessing.Pool(*args, **kwargs)
+    yield pool
+    pool.terminate()
 
-file = rt.TFile(args.data_path)
-tree = file.Get("latino")
+def parton_unpaired_to_jets (filename, radius, data_path, nevents, debug):
+    file = rt.TFile(data_path + '/' + filename)
+    filename = filename[:-5] # remove .root from filename
+    tree = file.Get("latino")
 
-nevents = args.nevents
-debug = args.debug
+    iev = 0
+    count_flag2_tot = 0 # number of events that have unpaired partons
+    count_flag2_last = 0 # number of events in which the unpaired parton is the last one
+    count_flag2_dist = [0.0]*5 
 
-iev = 0
-count_flag2_tot = 0
-count_flag2_last = 0
-count_flag2_dist = [0.0]*5
+    pt_histo = rt.TH1F('pt', 'Pt ' + filename, 100, -200, 200)
+    eta_histo = rt.TH1F('eta', 'Eta ' + filename, 100, -10, 10)
+    for event in tree:
+        partons, pids = utils.get_hard_partons(event, debug)
+        jets = utils.get_jets(event, debug)
 
-for event in tree:
+        # Remove top events
+        if 6 in pids or -6 in pids:
+            continue
 
-    partons, pids = utils.get_hard_partons(event, debug)
-    jets = utils.get_jets(event, debug)
+        if len(partons) != 4:
+            print ">>>> Problem! Event not with only 4 partons!!!! <<<<"
 
-    # Remove top events
-    if 6 in pids or -6 in pids:
-        continue
+        results, flag = utils.associate_vectors(jets, partons, args.radius)
+        if flag == 2:
+            count_flag2_tot += 1
+            # print results
+            if results[0][3] == -1:
+                # does not have really physical meaning, just a curiosity
+                count_flag2_last += 1
+            count_flag2_dist[ results[0].count(-1) ] += 1
+            unpaired_indices = [i for i, paired in enumerate(results[0]) if paired == -1]
+            # print unpaired_indices
+            for index in unpaired_indices:
+                pt_histo.Fill(partons[index].Pt())
+                eta_histo.Fill(partons[index].Eta())
+                # print " pt:   ", partons[index].Pt()
+                # print " eta: ", partons[index].Eta()
 
-    if len(partons) != 4:
-        print ">>>> Problem! Event not with only 4 partons!!!! <<<<"
+        iev+=1
+        if nevents > 0 and iev>= nevents:
+            break
 
-    results, flag = utils.associate_vectors(jets, partons, args.radius)
-    if flag == 2:
-        count_flag2_tot += 1
-        print results
-        if results[0][3] == -1:
-            # does not have really physical meaning, just a curiosity
-            count_flag2_last += 1
-        count_flag2_dist[ results[0].count(-1) ] += 1
-        unpaired_indices = [i for i, paired in enumerate(results[0]) if paired == -1]
-        print unpaired_indices
-        for index in unpaired_indices:
-            print " pt:   ", partons[index].Pt()
-            print " eta: ", partons[index].Eta()
+    print filename, iev, count_flag2_dist, count_flag2_tot, count_flag2_last
 
-    iev+=1
-    if nevents > 0 and iev>= nevents:
-        break
+    if not os.path.exists('outputs'):
+        os.makedirs('outputs')
 
-print iev, count_flag2_dist, count_flag2_tot, count_flag2_last
+    c1 = rt.TCanvas('c1', 'Pt ' + filename, 700, 700)
+    pt_histo.Draw()
+    # c1.Modified()
+    # c1.Update()
+    c1.Print('outputs/' + filename + '_unpaired_pt.png', 'png')
+    c2 = rt.TCanvas('c2', 'Eta ' + filename, 700, 700)
+    eta_histo.Draw()
+    c2.Print('outputs/' + filename + '_unpaired_eta.png', 'png')
+
+    out_file = rt.TFile('outputs/' + filename + '_unpaired_out.root', 'RECREATE')
+    pt_histo.Write()
+    eta_histo.Write()
+    out_file.Close()
+
+    result='finished'
+    return result
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Parton Analyzer, jet pairing')
+    parser.add_argument('data_path', type=str, help='All the files in this directory will be analyzed')
+    parser.add_argument('--radius', type=float, default=0.8, help="Radius from jet")
+    parser.add_argument('--nevents', type=int, default=10, help='How many events per file should be analysed. Set to a negative value to include all events')
+    parser.add_argument('--processes', type=int, default=8, help='Number of concurrent processes')
+    parser.add_argument('--debug', type=bool, default=False, help='Set debug mode')
+    args = parser.parse_args()
+
+    file_list = sorted(os.listdir(args.data_path))
+    with poolcontext(processes=args.processes) as pool:
+        results = pool.map(partial(parton_unpaired_to_jets, radius=args.radius, data_path=args.data_path, nevents=args.nevents, debug=args.debug), file_list)

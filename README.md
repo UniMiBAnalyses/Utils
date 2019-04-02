@@ -27,3 +27,17 @@ where:
 * `t_tbar`: number of events with a t _and_ a tbar
 
 if you want to get the number of events with only a `t` (`tbar`), it is `t - t_tbar` (`tbar - t_tbar`)
+
+## Unpaired parton analyzer
+
+output is:
+
+* a table whose header is
+  ```.bash
+  filename, tot_events, count_distr, count_tot
+  ```
+  where:
+  1. `tot_events` is the total number of events in the file
+  1. `count_distr` is a list whose entry with index `i` is the number of events such that `i` partons are unpaired in the file
+  2. `count_tot` is the number of events in which at least one parton is unpaired in the file
+* histograms as png and root files of pt and eta of unpaired partons for every file
