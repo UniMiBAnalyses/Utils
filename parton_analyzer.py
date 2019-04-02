@@ -32,20 +32,17 @@ for event in tree:
     iev+=1
     print "partons PID: ", pids
     print "partons: ", partons
-    
-    mass_pairs = utils.mjj_pairs(partons)
-    print "partons mass pairs", mass_pairs
 
     results, flag = utils.associate_vectors(jets, partons, args.radius)
     print results, flag
 
-    # Get pair of partons nearest to 
     # get the pair nearest  to W or Z mass
     vpair = utils.nearest_masses_pair(partons, [80.385, 91.1876])
     print(vpair)
     v_partons = [partons.pop(vpair[0]), partons.pop(vpair[1]-1)]
     
-    # Jet matching
+    if flag == 0:
+        pass
 
     
     if iev>= nevents:
