@@ -18,6 +18,9 @@ nevents = args.nevents
 debug = args.debug
 
 iev = 0
+count_flag2_tot = 0
+count_flag2_last = 0
+count_flag2_dist = [0.0]*5
 
 for event in tree:
 
@@ -31,31 +34,22 @@ for event in tree:
     if len(partons) != 4:
         print ">>>> Problem! Event not with only 4 partons!!!! <<<<"
 
-    print "> event: ", iev
-    iev+=1
-    print "partons PID: ", pids
-
     results, flag = utils.associate_vectors(jets, partons, args.radius)
-    print results, flag
+    if flag == 2:
+        count_flag2_tot += 1
+        print results
+        if results[0][3] == -1:
+            # does not have really physical meaning, just a curiosity
+            count_flag2_last += 1
+        count_flag2_dist[ results[0].count(-1) ] += 1
+        unpaired_indices = [i for i, paired in enumerate(results[0]) if paired == -1]
+        print unpaired_indices
+        for index in unpaired_indices:
+            print " pt:   ", partons[index].Pt()
+            print " eta: ", partons[index].Eta()
 
-    # get the pair nearest  to W or Z mass
-    vpair = utils.nearest_masses_pair(partons, [80.385, 91.1876])
-    vbspair = [i for i in range(4) if not i in vpair]
-
-    # Now we have the index of partons in the list of partons
-    # associated with W or Z boson and VBS jets
-    
-    print "Vparton", vpair
-    print "VBS partons", vbspair
-    
-    if flag ==0:
-        # using the results from association we can get
-        # the parton-associated jets
-        vjets = [ results[0][iparton]  for iparton in vpair]
-        vbs_jets =  [ results[0][iparton]  for iparton in vbspair]
-        print "Vjets", vjets
-        print "VBS_jets", vbs_jets
-
-    
+    iev+=1
     if nevents > 0 and iev>= nevents:
         break
+
+print iev, count_flag2_dist, count_flag2_tot, count_flag2_last
