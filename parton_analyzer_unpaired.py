@@ -8,6 +8,7 @@ from functools import partial
 from contextlib import contextmanager
 
 rt.gROOT.SetBatch(True)
+rt.gStyle.SetOptStat(0)
 
 @contextmanager
 def poolcontext(*args, **kwargs):
@@ -25,8 +26,9 @@ def parton_unpaired_to_jets (filename, radius, data_path, nevents, debug):
     count_flag2_last = 0 # number of events in which the unpaired parton is the last one
     count_flag2_dist = [0.0]*5 
 
-    pt_histo = rt.TH1F('pt', 'Pt ' + filename, 100, -200, 200)
-    eta_histo = rt.TH1F('eta', 'Eta ' + filename, 100, -10, 10)
+    pt_histo = rt.TH1F('pt', 'Pt ' + filename, 100, 0, 200)
+    eta_histo = rt.TH1F('eta', 'Eta ' + filename, 100, 0, 8)
+    pt_eta_histo = rt.TH2F('pt_eta', 'Pt Eta ' + filename, 100, 0, 200, 100, 0, 8)
     for event in tree:
         partons, pids = utils.get_hard_partons(event, debug)
         jets = utils.get_jets(event, debug)
@@ -50,7 +52,8 @@ def parton_unpaired_to_jets (filename, radius, data_path, nevents, debug):
             # print unpaired_indices
             for index in unpaired_indices:
                 pt_histo.Fill(partons[index].Pt())
-                eta_histo.Fill(partons[index].Eta())
+                eta_histo.Fill(abs(partons[index].Eta()))
+                pt_eta_histo.Fill(partons[index].Pt(), abs(partons[index].Eta()))
                 # print " pt:   ", partons[index].Pt()
                 # print " eta: ", partons[index].Eta()
 
@@ -69,12 +72,20 @@ def parton_unpaired_to_jets (filename, radius, data_path, nevents, debug):
     # c1.Update()
     c1.Print('outputs/' + filename + '_unpaired_pt.png', 'png')
     c2 = rt.TCanvas('c2', 'Eta ' + filename, 700, 700)
+    eta_histo.SetFillColor(rt.kBlue)
+    eta_histo.GetXaxis().SetTitle('eta')
     eta_histo.Draw()
     c2.Print('outputs/' + filename + '_unpaired_eta.png', 'png')
+    c3 = rt.TCanvas('c3', 'Pt Eta ' + filename, 700, 700)
+    pt_eta_histo.GetXaxis().SetTitle('pt [GeV]')
+    pt_eta_histo.GetYaxis().SetTitle('eta')
+    pt_eta_histo.Draw('colz')
+    c3.Print('outputs/' + filename + '_unpaired_pt_eta.png', 'png')
 
     out_file = rt.TFile('outputs/' + filename + '_unpaired_out.root', 'RECREATE')
     pt_histo.Write()
     eta_histo.Write()
+    pt_eta_histo.Write()
     out_file.Close()
 
     result='finished'

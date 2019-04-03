@@ -41,3 +41,10 @@ output is:
   1. `count_distr` is a list whose entry with index `i` is the number of events such that `i` partons are unpaired in the file
   2. `count_tot` is the number of events in which at least one parton is unpaired in the file
 * histograms as png and root files of pt and eta of unpaired partons for every file
+
+In order to complete this step, you should merge all intermediate root files
+with
+
+```.bash
+python histo_merger_unpaired.py
+```
