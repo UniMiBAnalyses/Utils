@@ -1,9 +1,9 @@
-import ROOT as rt  
 import sys  
 import utils
 import os
 import argparse
 from pprint import pprint
+import pandas as pd  
 
 def parse_datacard(directory, cut, events_datacard_filename):
     '''parse the rates from datacard file'''
@@ -40,6 +40,18 @@ def efficiency(directory):
         for index, rate in enumerate(cuts[cut]['rate']):
             cuts[cut]['eff'].append(float(rate) / float(cuts['no_cut']['rate'][index]))
     pprint(cuts)
+
+    columns = ['cut_name'] + cuts['no_cut']['process'] 
+    df = pd.DataFrame(columns=columns)
+    i = 0
+    for index in cuts:
+        row = [index] + cuts[index]['eff']
+        df.loc[i] = row
+        i += 1
+    # df_t = df.T 
+    df = df.sort_values(by=['cut_name'])
+    print df
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Compute btag efficiencies')
