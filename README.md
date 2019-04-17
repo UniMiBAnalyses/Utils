@@ -48,3 +48,12 @@ with
 ```.bash
 python histo_merger_unpaired.py
 ```
+
+
+## efficiencies from datacards
+
+Example 
+
+```
+python efficiencies_from_datacards.py /gwpool/users/dmapelli/CMSSW_8_0_26_patch1/src/PlotsConfigurations/Configurations/VBSjjlnu
+```

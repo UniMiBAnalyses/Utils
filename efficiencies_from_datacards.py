@@ -7,7 +7,6 @@ import pandas as pd
 
 def parse_datacard(directory, cut, events_datacard_filename):
     '''parse the rates from datacard file'''
-
     filepath = directory + cut + events_datacard_filename
     cut_description = {'cut': cut}
     with open(filepath) as f:
@@ -50,7 +49,10 @@ def efficiency(directory):
         i += 1
     # df_t = df.T 
     df = df.sort_values(by=['cut_name'])
-    print df
+    round_mask = {}
+    for process in cuts['no_cut']['process']:
+        round_mask[process] = 2
+    print df.round(round_mask)
 
 
 if __name__ == '__main__':
