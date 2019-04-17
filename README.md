@@ -54,6 +54,10 @@ python histo_merger_unpaired.py
 
 Example 
 
+The path that you have to specify is the one where the `configuration.py` file resides.
+This script expects that the directory `datacard` resides alongside with that script,
+inside the directory that you specify.
+
 ```
-python efficiencies_from_datacards.py /gwpool/users/dmapelli/CMSSW_8_0_26_patch1/src/PlotsConfigurations/Configurations/VBSjjlnu
+python efficiencies_from_datacards.py /path/to/plot/configuration
 ```
