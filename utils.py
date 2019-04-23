@@ -9,7 +9,7 @@ def get_quadrimomenta(pts, etas, phis, nvec, debug=False):
     for i in range(nvec):
         pt, eta, phi = pts[i], etas[i], phis[i]
         if debug:
-            print "pt:", pt ," eta:", eta, " phi:", phi
+            print ("pt:", pt ," eta:", eta, " phi:", phi)
         if abs(eta)>10:
             continue
         else:
@@ -27,36 +27,38 @@ def get_quadrimomentum(pt, eta, phi):
         v.SetPtEtaPhiE(pt, eta, phi, p)
         return v
 
-def get_hard_partons(event, debug=False):
+def get_hard_partons(event, ptmin=20., debug=False):
     partons = []
     pids = []
     for i, (pt, eta, phi, pid, isHard) in enumerate(
             zip(event.std_vector_partonGen_pt, event.std_vector_partonGen_eta,
                 event.std_vector_partonGen_phi, event.std_vector_partonGen_pid,
                 event.std_vector_partonGen_isHardProcess)):
-        if isHard==1 and abs(eta) < 10 :
+        if pt < ptmin or pt < 0:
+            break
+        if isHard==1 and abs(eta) < 10:
             vec = get_quadrimomentum(pt, eta, phi)
             # check if different from the previous one
             if len(partons)==0 or vec != partons[-1]:
                 if debug:
-                    print "Parton > pid: ", pid, " pt:", pt ," eta:", eta, " phi:", phi
+                    print ("Parton > pid: ", pid, " pt:", pt ," eta:", eta, " phi:", phi)
                 partons.append(vec)
                 pids.append(int(pid))
     return partons, pids
 
-def get_jets(event, debug=False):
+def get_jets(event, ptmin=20., debug=False):
     jets = []
     for pt, eta, phi in  zip(event.std_vector_jet_pt, 
                      event.std_vector_jet_eta, event.std_vector_jet_phi):
-        if pt < 0:
-            return jets
+        if pt < 0 or pt < ptmin:
+            break
         if abs(eta) < 10 :
             p = pt * cosh(eta)
             vec = TLorentzVector()
             vec.SetPtEtaPhiE(pt, eta, phi, p)
             # check if different from the previous one
             if debug:
-                print "Jet > pt:", pt ," eta:", eta, " phi:", phi
+                print ("Jet > pt:", pt ," eta:", eta, " phi:", phi)
             jets.append(vec)
     return jets
         

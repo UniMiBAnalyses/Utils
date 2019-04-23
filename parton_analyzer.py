@@ -8,6 +8,7 @@ parser.add_argument('data_path', type=str, help='All the files in this directory
 parser.add_argument('--nevents', type=int, default=1, help='How many events per file should be analysed. Set to a negative value to include all events')
 parser.add_argument('--debug', type=bool, default=False, help='Set debug mode')
 parser.add_argument('--radius', type=float, default=0.8, help="Radius from jet")
+parser.add_argument('--ptminjet', type=float, default=20., help="ptmin for jets and partons")
 
 args = parser.parse_args()
 
@@ -21,8 +22,8 @@ iev = 0
 
 for event in tree:
 
-    partons, pids = utils.get_hard_partons(event, debug)
-    jets = utils.get_jets(event, debug)
+    partons, pids = utils.get_hard_partons(event, args.ptminjet, debug)
+    jets = utils.get_jets(event, args.ptminjet, debug)
 
     # Remove top events
     if 6 in pids or -6 in pids:
@@ -59,3 +60,4 @@ for event in tree:
     
     if nevents > 0 and iev>= nevents:
         break
+
