@@ -1,6 +1,6 @@
 import ROOT as rt
 from ROOT import TLorentzVector
-from math import cosh
+from math import cosh, sqrt
 from itertools import combinations
 from operator import itemgetter
 
@@ -44,19 +44,22 @@ def get_hard_partons(event, debug=False):
                 pids.append(int(pid))
     return partons, pids
 
+
 def get_jets(event, debug=False):
     jets = []
-    for pt, eta, phi in  zip(event.std_vector_jet_pt, 
-                     event.std_vector_jet_eta, event.std_vector_jet_phi):
+    for pt, eta, phi, mass , in  zip(event.std_vector_jet_pt, 
+                     event.std_vector_jet_eta, event.std_vector_jet_phi,
+                     event.std_vector_jet_mass):
         if pt < 0:
             return jets
         if abs(eta) < 10 :
             p = pt * cosh(eta)
             vec = TLorentzVector()
-            vec.SetPtEtaPhiE(pt, eta, phi, p)
+            en = sqrt(p**2 + mass**2)
+            vec.SetPtEtaPhiE(pt, eta, phi, en)
             # check if different from the previous one
             if debug:
-                print "Jet > pt:", pt ," eta:", eta, " phi:", phi
+                print "Jet > pt:", pt ," eta:", eta, " phi:", phi, " mass:", mass
             jets.append(vec)
     return jets
         
