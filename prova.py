@@ -10,7 +10,7 @@ file = rt.TFile(sys.argv[1])
 tree = file.Get("latino")
 
 
-nevents = 10 
+nevents = 100 
 if len(sys.argv) > 2:
     nevents = int(sys.argv[2])
 
@@ -37,12 +37,6 @@ def mjj(vectors, pid):
     return l, f
 
 
-#histo = rt.TH1F("mjj", "mjj", 200, 124., 124.9)
-#histo.SetLineWidth(3)
-#histo.GetXaxis().SetTitle("m_{jj} (GeV)")
-#histo2 = rt.TH1F("mjj2", "mjj2", 120, 0., 100.)
-#histo2.SetLineWidth(3)
-#histo2.GetXaxis().SetTitle("m_{jj} (GeV)")
 
 
 
@@ -50,52 +44,42 @@ def mjj(vectors, pid):
 for event in tree:
 
     print "> event: ", iev
-    partons, pids = utils.get_hard_partons(event, 20., debug)
+    partons, pids = utils.get_hard_partons(event, 10., debug)
     print "partons PID: ", pids
     
-    jets = utils.get_jets(event, 20., debug)
-    results, flag = utils.associate_vectors(jets, partons, 10.)
-#    print results, flag
+    jets = utils.get_jets(event, 10., debug)
+    results, flag = utils.associate_vectors(jets, partons, 0.8)
+    print "jets association: ", results, flag
 
-    
+    flag2 = 0
+    if len(partons) != 4:
+        print ">>>> Problem! Event not with 4 partons!!!! <<<<"
+        flag2 = -1
+        continue
+
 
     mass_pair_b,  other_mass_pair = mjj(partons, pids)
-    print "Mass b pairs--->"
-    print mass_pair_b
-    print "Other pair--->"
-    print other_mass_pair
+    print "Mass b pairs--->", mass_pair_b
+    print "Other pair--->", other_mass_pair
 
-    #see which couple has a mass near to H
-    Hpair = utils.nearest_masses_pair(partons, 125.0)
-    other_pair = [i for i in range(4) if not i in Hpair]
-    print "nearest couple to H mass: ", Hpair    
-    print "The other pair: ", other_pair
-
-
+       
     if flag ==0:
         # using the results from association we can get
         # the parton-associated jets
-        Hjets = [ results[0][iparton]  for iparton in Hpair]
-#        other_jets =  [ results[0][iparton]  for iparton in other_pair]
+        Hjets = [ results[0][iparton]  for iparton in mass_pair_b[0][0]]
         print "Hjets: ", Hjets
-#        print "other_jets", other_jets
+
+        if flag2 != -1:
+            other_jets =  [ results[0][iparton]  for iparton in other_mass_pair[0][0]]
+            print "other_jets", other_jets
+
+    else:
+        print ">>>> Jets association gone wrong <<<<"
 
 
 
 
-
-
-
-
-
-
-
-#    histo.Fill(mass_pair_b[0][1])
-#    histo2.Fill(other_mass_pair[0][1])
-      
-    
-    
-    
+   
 
 
     print "---------------------------------------------------"
@@ -104,10 +88,3 @@ for event in tree:
         break
 
 
-#c1 = rt.TCanvas()
-#histo.Draw()
-#c1.Print("b_pair.root")
-
-#c2 = rt.TCanvas()
-#histo2.Draw()
-#c2.Print("other_pair.root")
