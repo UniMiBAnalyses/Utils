@@ -10,7 +10,8 @@ file = rt.TFile(sys.argv[1])
 tree = file.Get("latino")
 
 
-nevents = 100 
+
+nevents = 10 
 if len(sys.argv) > 2:
     nevents = int(sys.argv[2])
 
@@ -36,55 +37,45 @@ def mjj(vectors, pid):
     f = sorted(f, key=itemgetter(1), reverse=True)
     return l, f
 
-def get_max_btag(event, jets):
-    ntotjets = len(jets)
+
+def get_bjets(event, ptmin, debug):
+    bjets = []
+    jets = []
     l = []
     k = []
+    maxbtag1 = max(event.std_vector_jet_DeepCSVB)
+    maxbtag2 = -9999.
 
-    for index in range(ntotjets):
-        l.append(event.std_vector_jet_DeepCSVB[index])
+    index = 0
+    for i in range(len(event.std_vector_jet_DeepCSVB)):
+        if (event.std_vector_jet_DeepCSVB[i] != maxbtag1 and event.std_vector_jet_DeepCSVB[i] > maxbtag2):
+                maxbtag2 =  event.std_vector_jet_DeepCSVB[i]
+           
 
-                
-    max_btag = max(l)
-    print "entire list of btag: ", l
-
-    for i in range(len(l)):
-        btag = l[i]
-        if l[i] == max_btag:
-            max1 =l[i] 
-
-    
-    k = l
-    k.remove(max1)
-    print "list without max btag = ", k
-    for j in range(len(k)):
-        if k[j]==max(k):
-            max2 = k[j]
-            
-    k.remove(max2)
-    print "val massimi ", max1, max2
- 
-    return max1, max2
-
-
-
-def get_nonb_jets(event, max_btag1, max_btag2, ptmin=20.):
-    jets = []
-    for pt, eta, phi,mass, btag in  zip(event.std_vector_jet_pt, 
+    for pt, eta, phi,mass, bvalue in  zip(event.std_vector_jet_pt, 
                      event.std_vector_jet_eta, event.std_vector_jet_phi, 
                      event.std_vector_jet_mass, event.std_vector_jet_DeepCSVB):
-        if ((event.std_vector_jet_DeepCSVB != max_btag1) and (event.std_vector_jet_DeepCSVB != max_btag2)): 
-            if pt < 0 or pt < ptmin:
-                break
-            if abs(eta) < 10 :
-                p = pt * cosh(eta)
-                vec = TLorentzVector()
-                en = sqrt(p**2 + mass**2)
-                vec.SetPtEtaPhiE(pt, eta, phi, en)
-                # check if different from the previous one
-                         
+         
+        
+        if pt < 0 or pt < ptmin:
+            break
+        if abs(eta) < 10 :
+            p = pt * cosh(eta)
+            vec = TLorentzVector()
+            en = sqrt(p**2 + mass**2)
+
+            vec.SetPtEtaPhiE(pt, eta, phi, en)
+            # check if different from the previous one
+                     
+            if bvalue == maxbtag1 or bvalue == maxbtag2:
+                bjets.append(vec)
+                l.append(index)
+            else:
                 jets.append(vec)
-    return jets   
+                k.append(index)
+        index+=1
+
+    return bjets, jets, l, k
 
 
 ######## MAIN FUNCTION ########
@@ -95,15 +86,22 @@ for event in tree:
 #    print "partons PID: ", pids
     
     jets = utils.get_jets(event, 10., debug)
-    results, flag = utils.associate_vectors(jets, partons, 0.8)
+#    results, flag = utils.associate_vectors(jets, partons, 0.8)
 #    print "jets association: ", results, flag
 
-    print "number jets: ", len(jets)
-    max_btag1, max_btag2 = get_max_btag(event, jets)
+    print "number of jets: ", len(jets)
+#    max_btag1, max_btag2 = get_max_btag(event, jets)
     
     
-    prova = get_nonb_jets(event, max_btag1, max_btag2, 10.)
-    print "lung finale = ", len(prova)
+    bjets, nonbjets, index_b, index_nonb = get_bjets(event,  20., debug)
+    print "number of bjets: ", len(bjets)
+    print "number of jets not b: ", len(nonbjets)   
+
+
+    wjets = utils.nearest_mass_pair(nonbjets, 80.385)
+    print "W jets: ", wjets
+
+
 #    flag2 = 0
 #    if len(partons) != 4:
 #        print ">>>> Problem! Event not with 4 partons!!!! <<<<"
