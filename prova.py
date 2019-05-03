@@ -73,8 +73,8 @@ def get_bjets(event, ptmin, debug):
                 maxbtag2 = bvalue
                 b_jet2 = index                     
 
-        jets.append(vec)
-
+            jets.append(vec)
+    
         index+=1
 
     notb_jets = jets
