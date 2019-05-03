@@ -11,7 +11,7 @@ tree = file.Get("latino")
 
 
 
-nevents = 10 
+nevents = 100 
 if len(sys.argv) > 2:
     nevents = int(sys.argv[2])
 
@@ -42,16 +42,17 @@ def get_bjets(event, ptmin, debug):
     bjets = []
     jets = []
     l = []
-    k = []
+    
     maxbtag1 = max(event.std_vector_jet_DeepCSVB)
     maxbtag2 = -9999.
+    b_jet1 = 0
+    b_jet2 = 0
+    
+         
+ 
 
     index = 0
-    for i in range(len(event.std_vector_jet_DeepCSVB)):
-        if (event.std_vector_jet_DeepCSVB[i] != maxbtag1 and event.std_vector_jet_DeepCSVB[i] > maxbtag2):
-                maxbtag2 =  event.std_vector_jet_DeepCSVB[i]
-           
-
+   
     for pt, eta, phi,mass, bvalue in  zip(event.std_vector_jet_pt, 
                      event.std_vector_jet_eta, event.std_vector_jet_phi, 
                      event.std_vector_jet_mass, event.std_vector_jet_DeepCSVB):
@@ -65,41 +66,88 @@ def get_bjets(event, ptmin, debug):
             en = sqrt(p**2 + mass**2)
 
             vec.SetPtEtaPhiE(pt, eta, phi, en)
-            # check if different from the previous one
-                     
-            if bvalue == maxbtag1 or bvalue == maxbtag2:
-                bjets.append(vec)
-                l.append(index)
-            else:
-                jets.append(vec)
-                k.append(index)
+            
+            if bvalue == maxbtag1:
+                b_jet1 = index
+            elif bvalue > maxbtag2:
+                maxbtag2 = bvalue
+                b_jet2 = index                     
+
+        jets.append(vec)
+
         index+=1
 
-    return bjets, jets, l, k
+    notb_jets = jets
+    l = [b_jet1, b_jet2]
+    l.sort()
+   
+
+    return jets, notb_jets, l 
+
+def min_deltaeta_pairs(vectors, hpair):
+    l = []
+    for i ,k  in combinations(range(len(vectors)),2):
+        l.append( ([i,k], abs(vectors[i].Eta()- vectors[k].Eta()) ) )
+    l = sorted(l, key=itemgetter(1))
+    for i in range(len(l)):
+        if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
+            if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
+                return l[i][0]
+
+
+def max_pt_pair(vectors):
+    ''' Returns the pair with highest Pt'''
+    l = []
+    for i ,k  in combinations(range(len(vectors)),2):
+        l.append(( [i,k], (vectors[i]+ vectors[k]).Pt() ))
+    l = sorted(l, key=itemgetter(1), reverse=True)
+    l = sorted(l, key=itemgetter(1))
+    for i in range(len(l)):
+        if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
+            if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
+                return l[i][0]
+
+def nearest_mass_pair(vectors, mass):
+    ''' Returns the pair of vectors with invariant mass nearest to 
+    the given mass '''
+    l = []
+    for i ,k  in combinations(range(len(vectors)),2):
+        l.append(([i,k], abs(mass - (vectors[i]+ vectors[k]).M() )))  
+    l = sorted(l, key=itemgetter(1))
+    for i in range(len(l)):
+        if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
+            if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
+                return l[i][0]
 
 
 ######## MAIN FUNCTION ########
 for event in tree:
 
     print "> event: ", iev
-    partons, pids = utils.get_hard_partons(event, 10., debug)
+#    partons, pids = utils.get_hard_partons(event, 10., debug)
 #    print "partons PID: ", pids
     
-    jets = utils.get_jets(event, 10., debug)
+#    jets = utils.get_jets(event, 10., debug)
 #    results, flag = utils.associate_vectors(jets, partons, 0.8)
 #    print "jets association: ", results, flag
 
+  
+    
+    
+    jets, nonbjets, hpair = get_bjets(event,  20., debug)
     print "number of jets: ", len(jets)
-#    max_btag1, max_btag2 = get_max_btag(event, jets)
-    
-    
-    bjets, nonbjets, index_b, index_nonb = get_bjets(event,  20., debug)
-    print "number of bjets: ", len(bjets)
-    print "number of jets not b: ", len(nonbjets)   
+    print "number of others: ", len(nonbjets)
+    print "Hpair: ", hpair     
 
 
-    wjets = utils.nearest_mass_pair(nonbjets, 80.385)
-    print "W jets: ", wjets
+    wjets = nearest_mass_pair(jets, 80.385)
+    print "W jets con nearest mass: ", wjets
+
+    wjets = max_pt_pair(jets)
+    print "W jets con pt max: ", wjets
+
+    wjets = min_deltaeta_pairs(jets, hpair)
+    print "W jets con delta eta min: ", wjets
 
 
 #    flag2 = 0
