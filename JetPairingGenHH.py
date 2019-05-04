@@ -25,7 +25,7 @@ class JetPairingGenVBS(TreeCloner):
         group.add_option('-d', '--debug',  dest='debug',  help='Debug flag',  default="0")
         group.add_option('--radius',  dest='radius',  help='Radius for jet-parton association',  default=1.)
         group.add_option('--ptminjet',  dest='ptmin_jet',  help='Min Pt for jets',  default=20.)
-        
+        group.add_option('-m', '--mode',  dest='mode',  help='Pairing mode, 0=nearest W mas, 1=max_pt, 2=mindeltaeta',  default="0")        
         parser.add_option_group(group)
         return group
 
@@ -84,9 +84,13 @@ class JetPairingGenVBS(TreeCloner):
                 
             #find the W jets
             if len(partons) >= 4 and len(bpair) == 2:
-                wpair = nearest_mass_pair(partons, 80.385, bpair)
-#                wpair = max_pt_pair(partons, bpair)
-#                wpair = min_deltaeta_pairs(partons, bpair)  
+                if self.mode == 0:
+                    wpair = utils.nearest_mass_pair_notH(jets, 80.385, hpair)
+                elif self.mode == 1:
+                    wpair = utils.max_pt_pair_notH(jets, hpair)   
+                elif self.mode == 2:
+                    wpair = utils.min_deltaeta_pairs_notH(jets, hpair)
+  
 
  
             # now associate partons and nearest jets
