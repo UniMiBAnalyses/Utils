@@ -95,7 +95,7 @@ def min_deltaeta_pairs(vectors, hpair):
                 return l[i][0]
 
 
-def max_pt_pair(vectors):
+def max_pt_pair(vectors, hpair):
     ''' Returns the pair with highest Pt'''
     l = []
     for i ,k  in combinations(range(len(vectors)),2):
@@ -107,7 +107,7 @@ def max_pt_pair(vectors):
             if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
                 return l[i][0]
 
-def nearest_mass_pair(vectors, mass):
+def nearest_mass_pair(vectors, mass, hpair):
     ''' Returns the pair of vectors with invariant mass nearest to 
     the given mass '''
     l = []
@@ -117,60 +117,66 @@ def nearest_mass_pair(vectors, mass):
     for i in range(len(l)):
         if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
             if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
-                return l[i][0]
+                return  l[i][0]
 
 
 ######## MAIN FUNCTION ########
 for event in tree:
 
     print "> event: ", iev
-#    partons, pids = utils.get_hard_partons(event, 10., debug)
-#    print "partons PID: ", pids
+    partons, pids = utils.get_hard_partons(event, 10., debug)
+    print "partons PID: ", pids
     
-#    jets = utils.get_jets(event, 10., debug)
-#    results, flag = utils.associate_vectors(jets, partons, 0.8)
-#    print "jets association: ", results, flag
+    jets = utils.get_jets(event, 10., debug)
+    results, flag = utils.associate_vectors(jets, partons, 0.8)
+    print "jets association: ", results, flag
 
+    bpair = [-1,-1]
+    wpair = [-1,-1]
+    H_jets = [-1,-1]
+    W_jets = [-1,-1]    
+    
+#    jets, nonbjets, hpair = get_bjets(event,  20., debug)
+#    print "number of jets: ", len(jets)
+#    print "number of others: ", len(nonbjets)
+#    print "Hpair: ", hpair     
+
+
+#    wjets = nearest_mass_pair(jets, 80.385)
+#    print "W jets con nearest mass: ", wjets
+#
+#    wjets = max_pt_pair(jets)
+#    print "W jets con pt max: ", wjets
+#
+#    wjets = min_deltaeta_pairs(jets, hpair)
+#    print "W jets con delta eta min: ", wjets
+#
   
+
     
-    
-    jets, nonbjets, hpair = get_bjets(event,  20., debug)
-    print "number of jets: ", len(jets)
-    print "number of others: ", len(nonbjets)
-    print "Hpair: ", hpair     
+    if len(partons) >= 2:
+        bpair = [i for i, p in enumerate(pids) if p in [5,-5]]
+
+    print "i b sono: ", bpair
 
 
-    wjets = nearest_mass_pair(jets, 80.385)
-    print "W jets con nearest mass: ", wjets
-
-    wjets = max_pt_pair(jets)
-    print "W jets con pt max: ", wjets
-
-    wjets = min_deltaeta_pairs(jets, hpair)
-    print "W jets con delta eta min: ", wjets
+    if len(partons) >= 4 and len(bpair) == 2:
+         wpair = nearest_mass_pair(partons, 80.385, bpair)
+#        wpair = max_pt_pair(partons, bpair)
+#        wpair = min_deltaeta_pairs(partons, bpair)
+    print "wpair: ", wpair
 
 
-#    flag2 = 0
-#    if len(partons) != 4:
-#        print ">>>> Problem! Event not with 4 partons!!!! <<<<"
-#        flag2 = -1
-#        continue
-#
 
-#    mass_pair_b,  other_mass_pair = mjj(partons, pids)
-#    print "Mass b pairs--->", mass_pair_b
-#    print "Other pair--->", other_mass_pair
-#
        
-#    if flag ==0:
-#        # using the results from association we can get
-#        # the parton-associated jets
-#        Hjets = [ results[0][iparton]  for iparton in mass_pair_b[0][0]]
-#        print "Hjets: ", Hjets
-#
-##        prova = utils.nearest_masses_pair(jets, 125.0)
-##        print "PROVA: ", prova
-#
+    if flag ==0:
+        # using the results from association we can get
+        # the parton-associated jets
+        for ip, iparton in enumerate(bpair):
+            H_jets[ip] = results[0][iparton]
+        for jp, jparton in enumerate(wpair):
+            W_jets[jp] = results[0][jparton] 
+
 
 
 #        if flag2 != -1:
@@ -179,7 +185,7 @@ for event in tree:
 #
 #    else:
 #        print ">>>> Jets association gone wrong <<<<"
-#
+
 
 
 
