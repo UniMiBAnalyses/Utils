@@ -12,7 +12,7 @@ tree = file.Get("latino")
 
 
 
-nevents = 100 
+nevents = 1000 
 if len(sys.argv) > 2:
     nevents = int(sys.argv[2])
 
@@ -84,41 +84,6 @@ def get_bjets(event, ptmin, debug):
 
     return jets,  l 
 
-def min_deltaeta_pairs(vectors, hpair):
-    l = []
-    for i ,k  in combinations(range(len(vectors)),2):
-        l.append( ([i,k], abs(vectors[i].Eta()- vectors[k].Eta()) ) )
-    l = sorted(l, key=itemgetter(1))
-    for i in range(len(l)):
-        if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
-            if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
-                return l[i][0]
-
-
-def max_pt_pair(vectors, hpair):
-    ''' Returns the pair with highest Pt'''
-    l = []
-    for i ,k  in combinations(range(len(vectors)),2):
-        l.append(( [i,k], (vectors[i]+ vectors[k]).Pt() ))
-    l = sorted(l, key=itemgetter(1), reverse=True)
-    l = sorted(l, key=itemgetter(1))
-    for i in range(len(l)):
-        if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
-            if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
-                return l[i][0]
-
-def nearest_mass_pair(vectors, mass, hpair):
-    ''' Returns the pair of vectors with invariant mass nearest to 
-    the given mass '''
-    l = []
-    for i ,k  in combinations(range(len(vectors)),2):
-        l.append(([i,k], abs(mass - (vectors[i]+ vectors[k]).M() )))  
-    l = sorted(l, key=itemgetter(1))
-    for i in range(len(l)):
-        if l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1] and \
-           l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]:
-            return  l[i][0]
-
 def get_jets_and_bscore(event, ptmin=20., debug=False):
     jets = []
     b_scores = []
@@ -139,68 +104,102 @@ def get_jets_and_bscore(event, ptmin=20., debug=False):
     
     return jets, b_scores
 
+def nearest_mass_pair_notH(vectors, mass, hpair):
+    ''' Returns the pair of vectors with invariant mass nearest to 
+    the given mass, checking if it isn't the bb pair '''
+    l = []
+    for i ,k  in combinations(range(len(vectors)),2):
+        l.append(([i,k], abs(mass - (vectors[i]+ vectors[k]).M() )))  
+    l = sorted(l, key=itemgetter(1))
+    for i in range(len(l)):
+        if  l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]  and \
+            l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]:
+            return l[i][0]
+
+def max_pt_pair_notH(vectors, hpair):
+    ''' Returns the pair with highest Pt, , checking that it isn't the bb pair'''
+    l = []
+    for i ,k  in combinations(range(len(vectors)),2):
+        l.append(( [i,k], (vectors[i]+ vectors[k]).Pt() ))
+    l = sorted(l, key=itemgetter(1), reverse=True)
+    l = sorted(l, key=itemgetter(1))
+    for i in range(len(l)):
+        if l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1] and \
+           l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]:
+            return l[i][0]
+
+def min_deltaeta_pairs_notH(vectors, hpair):
+    l = []
+    for i ,k  in combinations(range(len(vectors)),2):
+        l.append( ([i,k], abs(vectors[i].Eta()- vectors[k].Eta()) ) )
+    l = sorted(l, key=itemgetter(1))
+    for i in range(len(l)):
+        if  l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1] and \
+            l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1] :
+            return l[i][0]
+
+
+eve = 0
+
 ######## MAIN FUNCTION ########
 for event in tree:
 
     print "> event: ", iev
 #    partons, pids = utils.get_hard_partons(event, 10., debug)
 #    print "partons PID: ", pids
-    
+#    
 #    jets = utils.get_jets(event, 10., debug)
 #    results, flag = utils.associate_vectors(jets, partons, 0.8)
 #    print "jets association: ", results, flag
-
-    hpair = [-1,-1]
-    wpair = [-1,-1]
-    H_jets = numpy.zeros(2, dtype=numpy.int32)
-    W_jets = numpy.zeros(2, dtype=numpy.int32)
-    
+#
+#    hpair = [-1,-1]
+#    wpair = [-1,-1]
+#    H_jets = numpy.zeros(2, dtype=numpy.int32)
+#    W_jets = numpy.zeros(2, dtype=numpy.int32)
+#    
 #    jets, hpair = get_bjets(event,  20., debug)
 #    print "number of jets: ", len(jets)
-#    print "number of others: ", len(nonbjets)
 #    print "Hpair: ", hpair     
-
-
-#    wjets = nearest_mass_pair(jets, 80.385, hpair)
-#    print "W jets con nearest mass: ", wjets
 #
-#    wjets = max_pt_pair(jets)
+#    if len(partons) >= 4:
+#        wjets = nearest_mass_pair_notH(jets, 80.385, hpair)
+#        print "W jets con nearest mass: ", wjets
+
+#    wjets = max_pt_pair_notH(jets, hpair)
 #    print "W jets con pt max: ", wjets
 #
-#    wjets = min_deltaeta_pairs(jets, hpair)
+#    wjets = min_deltaeta_pairs_notH(jets, hpair)
 #    print "W jets con delta eta min: ", wjets
-#
-  
+
+ 
 #    H_jets[0], H_jets[1] = hpair 
 #    W_jets[0], W_jets[1] = wpair 
 #    print "H_jets: ", H_jets
 #    print "W_jets: ", W_jets
 
-    print "---secondo metodo---"
-
-    jets, b_scores = get_jets_and_bscore(event, 20., debug)
-    bjets = [(i, bscore) for i, bscore in enumerate(b_scores)
-               if bscore >= 0.63]
-    print "bscores: ", b_scores
-    print "bjets 1: ", bjets
+#    jets, b_scores = get_jets_and_bscore(event, 20., debug)
+#    bjets = [(i, bscore) for i, bscore in enumerate(b_scores)
+#               if bscore >= 0.63]
+#    print "bscores: ", b_scores
+#    print "bjets 1: ", bjets
 
 
-    if len(bjets) >= 2:
-    # Take the indexes of the two jets with bigger bscore
-        hpair = [j[0] for j in list(sorted(bjets, key=itemgetter(1), reverse=True))[:2]]
+#    if len(bjets) >= 2:
+#    # Take the indexes of the two jets with bigger bscore
+#        hpair = [j[0] for j in list(sorted(bjets, key=itemgetter(1), reverse=True))[:2]]
+#
+#        print "hpair: ", hpair
 
-        print "hpair: ", hpair
+#        if len(jets) >=4:
+#            wpair = nearest_mass_pair(jets, 80.385, hpair)
+#
+#        print "wpair: ", wpair
 
-        if len(jets) >=4:
-            wpair = nearest_mass_pair(jets, 80.385, hpair)
+#    H_jets[0], H_jets[1] = hpair
+#    W_jets[0], W_jets[1] = wpair
 
-        print "wpair: ", wpair
-
-    H_jets[0], H_jets[1] = hpair
-    W_jets[0], W_jets[1] = wpair
-
-    print "H_jets: ", H_jets
-    print "W_jets: ", W_jets
+#    print "H_jets: ", H_jets
+#    print "W_jets: ", W_jets
 
 #    if len(partons) >= 2:
 #        bpair = [i for i, p in enumerate(pids) if p in [5,-5]]
@@ -225,19 +224,28 @@ for event in tree:
 #        for jp, jparton in enumerate(wpair):
 #            W_jets[jp] = results[0][jparton] 
 
+#    hpair_true = [-1,-1]
+#    wpair_true = [-1,-1]
+#    hpair = [-1,-1]
+#    wpair = [-1,-1]
+    counter = 0
+    flag = 0 #if flag = 0 not same, if flag = 1 same couple
 
 
-#        if flag2 != -1:
-#            other_jets =  [ results[0][iparton]  for iparton in other_mass_pair[0][0]]
-#            print "other_jets", other_jets
-#
+    print "H_jets: ", sorted(event.H_jets, reverse=False)
+    print "H_jets reversed: ", sorted(event.H_jets, reverse=True)
+
+    if event.H_jets == [-1 -1]:
+        print "-1,-1"
+
+#    if event.W_jets == event.W_jets_true or event.W_jets == sorted(event.W_jets_true, reverse=True):
+#        flag = 1
+#        counter += 1
+    
 #    else:
-#        print ">>>> Jets association gone wrong <<<<"
+#        flag = 0
+        
 
-
-
-
-   
 
 
     print "---------------------------------------------------"
@@ -245,4 +253,4 @@ for event in tree:
     if iev>= nevents:
         break
 
-
+#    print "efficienza su H pair: ", counter/nevents
