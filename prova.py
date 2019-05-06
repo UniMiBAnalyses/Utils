@@ -5,6 +5,7 @@ from itertools import combinations
 from operator import itemgetter
 import sys  
 import utils
+import numpy
 
 file = rt.TFile(sys.argv[1])
 tree = file.Get("latino")
@@ -39,7 +40,6 @@ def mjj(vectors, pid):
 
 
 def get_bjets(event, ptmin, debug):
-    bjets = []
     jets = []
     l = []
     
@@ -77,12 +77,12 @@ def get_bjets(event, ptmin, debug):
     
         index+=1
 
-    notb_jets = jets
+
     l = [b_jet1, b_jet2]
     l.sort()
    
 
-    return jets, notb_jets, l 
+    return jets,  l 
 
 def min_deltaeta_pairs(vectors, hpair):
     l = []
@@ -115,34 +115,53 @@ def nearest_mass_pair(vectors, mass, hpair):
         l.append(([i,k], abs(mass - (vectors[i]+ vectors[k]).M() )))  
     l = sorted(l, key=itemgetter(1))
     for i in range(len(l)):
-        if (l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1]):
-            if (l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]):
-                return  l[i][0]
+        if l[i][0][0] != hpair[0] and l[i][0][0] != hpair[1] and \
+           l[i][0][1] != hpair[0] and l[i][0][1] != hpair[1]:
+            return  l[i][0]
 
+def get_jets_and_bscore(event, ptmin=20., debug=False):
+    jets = []
+    b_scores = []
+
+    for pt, eta, phi,mass, bvalue in  zip(event.std_vector_jet_pt, 
+                     event.std_vector_jet_eta, event.std_vector_jet_phi, 
+                     event.std_vector_jet_mass, event.std_vector_jet_DeepCSVB):
+
+        if pt < 0 or pt < ptmin:
+            break
+        if abs(eta) < 10 :
+            p = pt * cosh(eta)
+            vec = TLorentzVector()
+            en = sqrt(p**2 + mass**2)
+            vec.SetPtEtaPhiE(pt, eta, phi, en)
+            jets.append(vec)
+            b_scores.append(bvalue)
+    
+    return jets, b_scores
 
 ######## MAIN FUNCTION ########
 for event in tree:
 
     print "> event: ", iev
-    partons, pids = utils.get_hard_partons(event, 10., debug)
-    print "partons PID: ", pids
+#    partons, pids = utils.get_hard_partons(event, 10., debug)
+#    print "partons PID: ", pids
     
-    jets = utils.get_jets(event, 10., debug)
-    results, flag = utils.associate_vectors(jets, partons, 0.8)
-    print "jets association: ", results, flag
+#    jets = utils.get_jets(event, 10., debug)
+#    results, flag = utils.associate_vectors(jets, partons, 0.8)
+#    print "jets association: ", results, flag
 
-    bpair = [-1,-1]
+    hpair = [-1,-1]
     wpair = [-1,-1]
-    H_jets = [-1,-1]
-    W_jets = [-1,-1]    
+    H_jets = numpy.zeros(2, dtype=numpy.int32)
+    W_jets = numpy.zeros(2, dtype=numpy.int32)
     
-#    jets, nonbjets, hpair = get_bjets(event,  20., debug)
+#    jets, hpair = get_bjets(event,  20., debug)
 #    print "number of jets: ", len(jets)
 #    print "number of others: ", len(nonbjets)
 #    print "Hpair: ", hpair     
 
 
-#    wjets = nearest_mass_pair(jets, 80.385)
+#    wjets = nearest_mass_pair(jets, 80.385, hpair)
 #    print "W jets con nearest mass: ", wjets
 #
 #    wjets = max_pt_pair(jets)
@@ -152,30 +171,59 @@ for event in tree:
 #    print "W jets con delta eta min: ", wjets
 #
   
+#    H_jets[0], H_jets[1] = hpair 
+#    W_jets[0], W_jets[1] = wpair 
+#    print "H_jets: ", H_jets
+#    print "W_jets: ", W_jets
 
-    
-    if len(partons) >= 2:
-        bpair = [i for i, p in enumerate(pids) if p in [5,-5]]
+    print "---secondo metodo---"
 
-    print "i b sono: ", bpair
+    jets, b_scores = get_jets_and_bscore(event, 20., debug)
+    bjets = [(i, bscore) for i, bscore in enumerate(b_scores)
+               if bscore >= 0.63]
+    print "bscores: ", b_scores
+    print "bjets 1: ", bjets
 
 
-    if len(partons) >= 4 and len(bpair) == 2:
-         wpair = nearest_mass_pair(partons, 80.385, bpair)
-#        wpair = max_pt_pair(partons, bpair)
-#        wpair = min_deltaeta_pairs(partons, bpair)
-    print "wpair: ", wpair
+    if len(bjets) >= 2:
+    # Take the indexes of the two jets with bigger bscore
+        hpair = [j[0] for j in list(sorted(bjets, key=itemgetter(1), reverse=True))[:2]]
+
+        print "hpair: ", hpair
+
+        if len(jets) >=4:
+            wpair = nearest_mass_pair(jets, 80.385, hpair)
+
+        print "wpair: ", wpair
+
+    H_jets[0], H_jets[1] = hpair
+    W_jets[0], W_jets[1] = wpair
+
+    print "H_jets: ", H_jets
+    print "W_jets: ", W_jets
+
+#    if len(partons) >= 2:
+#        bpair = [i for i, p in enumerate(pids) if p in [5,-5]]
+#
+#    print "i b sono: ", bpair
+#
+#
+#    if len(partons) >= 4 and len(bpair) == 2:
+#         wpair = nearest_mass_pair(partons, 80.385, bpair)
+##        wpair = max_pt_pair(partons, bpair)
+##        wpair = min_deltaeta_pairs(partons, bpair)
+#    print "wpair: ", wpair
 
 
 
        
-    if flag ==0:
-        # using the results from association we can get
-        # the parton-associated jets
-        for ip, iparton in enumerate(bpair):
-            H_jets[ip] = results[0][iparton]
-        for jp, jparton in enumerate(wpair):
-            W_jets[jp] = results[0][jparton] 
+#    if flag ==0:
+#        # using the results from association we can get
+#        # the parton-associated jets
+#        for ip, iparton in enumerate(bpair):
+#            H_jets[ip] = results[0][iparton]
+#        for jp, jparton in enumerate(wpair):
+#            W_jets[jp] = results[0][jparton] 
 
 
 
