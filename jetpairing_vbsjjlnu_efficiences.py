@@ -24,28 +24,36 @@ def jetpairing_ecciciency(file_list, data_path, nevents):
         'events_notop_matched_vjets': 0,
         'events_notop_matched_vjets_vbsjets': 0
     }
+    file_mask = file_list[0][:file_list[0].find('__')]
+    vjets_eff   = rt.TEfficiency ('vjets'+file_mask, 'vjets efficiency', 15, 0, 400)
+    vbsjets_eff = rt.TEfficiency ('vbsjets'+file_mask, 'vbsjets efficiency', 15, 0, 1200)
     for current_file in file_list:
-        file = rt.TFile(data_path + '/' + current_file)
-        tree = file.Get("latino")
-
+        infile = rt.TFile(data_path + '/' + current_file)
+        tree = infile.Get("latino")
         iev = 0
         for event in tree:
+            vjetsmatch   = set([true == reco for true,reco in zip(event.V_jets_true,   event.V_jets)]) == {True}
+            vbsjetsmatch = set([true == reco for true,reco in zip(event.VBS_jets_true, event.VBS_jets)]) == {True}
             pairing_result['events'] += 1
             if event.hasTopGen == 0.:
                 pairing_result['events_notop'] += 1
             if event.PartonJetMatchFlag == 0:
                 pairing_result['events_notop_matched'] += 1
-            vjetsmatch   = set([true == reco for true,reco in zip(event.V_jets_true,   event.V_jets)])
-            vbsjetsmatch = set([true == reco for true,reco in zip(event.VBS_jets_true, event.VBS_jets)])
-            if vjetsmatch == {True}:
+                vbsjets_eff.Fill(vjetsmatch and vbsjetsmatch, event.mjj_vbs)
+                vjets_eff.Fill(vjetsmatch, event.mjj_vjet)
+            if vjetsmatch:
                 pairing_result['events_notop_matched_vjets'] += 1
-            if vjetsmatch == {True} and vbsjetsmatch == {True}:
+            if vjetsmatch and vbsjetsmatch:
                 pairing_result['events_notop_matched_vjets_vbsjets'] += 1
             iev+=1
             if nevents > 0 and iev>= nevents:
                 break
     pairing_result['efficiency_notop_matched_vjets']         = float(pairing_result['events_notop_matched_vjets'])         / float (pairing_result['events_notop_matched'] )
     pairing_result['efficiency_notop_matched_vjets_vbsjets'] = float(pairing_result['events_notop_matched_vjets_vbsjets']) / float (pairing_result['events_notop_matched'] )
+    outfile = rt.TFile('../' + file_mask + '.root', 'RECREATE')
+    vjets_eff.Write()
+    vbsjets_eff.Write()
+    outfile.Close()
     return pairing_result
 
 if __name__ == '__main__':
@@ -77,6 +85,6 @@ if __name__ == '__main__':
     with poolcontext(processes=args.processes) as pool:
         results = pool.map(partial(jetpairing_ecciciency, data_path=args.data_path, nevents=args.nevents), file_list_grouped)
     pprint.pprint (results)
-    with open('../pairing_result.txt', 'w') as result_file:
+    with open('../pairing_result.json', 'w') as result_file:
         json.dump(results, result_file)
 
