@@ -65,7 +65,7 @@ def efficiency(directory, nocut_name='no_cut', debug=False):
     directory += '/datacards/'
     cuts_list = sorted(os.listdir(directory))
     print cuts_list
-    events_datacard_filename = '/events/datacard.txt'
+    events_datacard_filename = '/events/datacard.txt' # hardcoded cut name
 
     cuts = {}
     for cut in cuts_list:
