@@ -23,17 +23,30 @@ import os
 def check_sample_hercules(latino_name, config, sample_summary):
     if config == None:
         return []
-    
-    base_bkg_path = config['base_path'] + config['bkg_path']
+
     latino_name_mask = 'latino_' + latino_name + '__'
-    for step in config['bkg_steps']:
-        for step_name, step_path in step.items():
-            found = False
-            for file in os.listdir(base_bkg_path + step_path):
-                if file.find(latino_name_mask) == 0:
-                    found = True
-            # sample_summary[latino_name][step_name] = os.path.isfile(full_bkg_path)
-            sample_summary[latino_name][step_name] = found
+    for directory in config['directories']:
+        for dir_tag, dir_props in directory.items():
+            for step in dir_props['steps']:
+                for step_name, step_path in step.items():
+                    found = False
+                    for file in os.listdir(dir_props['base_path'] + step_path):
+                        if file.find(latino_name_mask) == 0:
+                            found = True
+                    # sample_summary[latino_name][step_name] = os.path.isfile(full_bkg_path)
+                    sample_summary[latino_name][dir_tag + '//' + step_name] = found
+
+
+    # base_bkg_path = config['base_path'] + config['bkg_path']
+    # latino_name_mask = 'latino_' + latino_name + '__'
+    # for step in config['bkg_steps']:
+    #     for step_name, step_path in step.items():
+    #         found = False
+    #         for file in os.listdir(base_bkg_path + step_path):
+    #             if file.find(latino_name_mask) == 0:
+    #                 found = True
+    #         # sample_summary[latino_name][step_name] = os.path.isfile(full_bkg_path)
+    #         sample_summary[latino_name][step_name] = found
 
     return sample_summary
 
@@ -60,11 +73,14 @@ if __name__ == '__main__':
                 samples_summary[latino_name]['latino_code'] = latino_code 
                 samples_summary[latino_name]['latino_name'] = latino_name
                 samples_summary[latino_name]['das_name'] = samples_latino.samples[latino_name][0]
-                for step in config['bkg_steps']:
-                    for stepname in step.keys():
-                        samples_summary[latino_name][stepname] = False
-                        if ('table_columns' in config.keys()) and (not stepname in config['table_columns']):
-                            config['table_columns'].append(stepname)
+                for directory in config['directories']:
+                    for dir_tag, dir_props in directory.items():
+                        for step in dir_props['steps']:
+                            for step_name in step.keys():
+                                step_tag = dir_tag + '//' + step_name
+                                samples_summary[latino_name][step_tag] = False
+                                if ('table_columns' in config.keys()) and (not step_tag in config['table_columns']):
+                                    config['table_columns'].append(step_tag)
 
         latino_name_used = []
         if latino_code in samples_vbsjjlnu.samples_vbsjjlnu_bkg.keys():
