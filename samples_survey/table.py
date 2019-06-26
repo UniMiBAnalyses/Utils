@@ -37,6 +37,12 @@ def check_sample_hercules(latino_name, config, sample_summary):
 
     return sample_summary
 
+def df_cut_mask(df, cuts):
+    cut_mask = True
+    for cut in cuts:
+        for cut_name, cut_value in cut.items():
+            cut_mask = cut_mask & (df[cut_name] == cut_value)
+    return cut_mask
 
 if __name__ == '__main__':
     samples_summary = {}
@@ -57,7 +63,7 @@ if __name__ == '__main__':
                 for step in config['bkg_steps']:
                     for stepname in step.keys():
                         samples_summary[latino_name][stepname] = False
-                        if not stepname in config['table_columns']:
+                        if ('table_columns' in config.keys()) and (not stepname in config['table_columns']):
                             config['table_columns'].append(stepname)
 
         latino_name_used = []
@@ -91,11 +97,12 @@ if __name__ == '__main__':
                 samples_summary = check_sample_hercules(latino_name, config, samples_summary)
 
     df = pd.DataFrame.from_dict(data=samples_summary, orient='index')
-    ## Defince cuts here
-    # df = df[df['used'] == True]
     df = df.reset_index()
     df = df.groupby(['latino_code', 'latino_name']).first()
-    df = df[config['table_columns']]
+    if 'cut' in config.keys():
+        df = df[df_cut_mask(df, config['cut'])]
+    if 'table_columns' in config.keys():
+        df = df[config['table_columns']]
     pd.set_option('display.max_colwidth', -1)
     with open('samples_nocolor.html', 'w') as f:
         f.write('''<html>

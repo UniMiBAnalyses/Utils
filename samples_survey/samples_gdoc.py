@@ -8,38 +8,6 @@ Currently, `transferred_unchecked` is a dummy key.
 
 samples_gdoc = {}
 
-samples_gdoc['WLLJJToLNu'] = {'transferred_unchecked': True}
-samples_gdoc['WZTo1L1Nu2Q'] = {'transferred_unchecked': True}
-samples_gdoc['WZTo1L3Nu'] = {'transferred_unchecked': True}
-samples_gdoc['WZTo2L2Q'] = {'transferred_unchecked': True}
-samples_gdoc['WWTo2L2Nu'] = {'transferred_unchecked': True}
-samples_gdoc['WWTo2L2Nu_aTGC'] = {'transferred_unchecked': True}
-samples_gdoc['WWW'] = {'transferred_unchecked': True}
-samples_gdoc['WWZ'] = {'transferred_unchecked': True}
-samples_gdoc['bbHToWWTo2L2Nu_M125_yb2'] = {'transferred_unchecked': True}
-samples_gdoc['bbHToWWTo2L2Nu_M125_yb2'] = {'transferred_unchecked': True}
-samples_gdoc['ST_s-channel'] = {'transferred_unchecked': True}
-samples_gdoc['ST_t-channel_antitop'] = {'transferred_unchecked': True}
-samples_gdoc['ST_t-channel_top'] = {'transferred_unchecked': True}
-samples_gdoc['ST_tW_antitop'] = {'transferred_unchecked': True}
-samples_gdoc['ST_tW_top'] = {'transferred_unchecked': True}
-samples_gdoc['TTToSemiLepton'] = {'transferred_unchecked': True}
-samples_gdoc['TTWJetsToLNu'] = {'transferred_unchecked': True}
-samples_gdoc['TTWJetsToQQ'] = {'transferred_unchecked': True}
-samples_gdoc['Wg_AMCNLOFXFX'] = {'transferred_unchecked': True}
-samples_gdoc['Wg_MADGRAPHMLM'] = {'transferred_unchecked': True}
-samples_gdoc['WgStarLNuEE'] = {'transferred_unchecked': True}
-samples_gdoc['WgStarLNuMuMu'] = {'transferred_unchecked': True}
-samples_gdoc['WJetsToLNu'] = {'transferred_unchecked': True}
-samples_gdoc['GluGluWWTo2L2Nu'] = {'transferred_unchecked': True}
-samples_gdoc['TTTo2L2Nu'] = {'transferred_unchecked': True}
-samples_gdoc['WGJJ'] = {'transferred_unchecked': True}
-samples_gdoc['WZJJ_EWK_QCD'] = {'transferred_unchecked': True}
-samples_gdoc['WZ'] = {'transferred_unchecked': True}
-samples_gdoc['WZZ'] = {'transferred_unchecked': True}
-samples_gdoc['ZZTo2L2Q'] = {'transferred_unchecked': True}
-samples_gdoc['ZZZ'] = {'transferred_unchecked': True}
-
 samples_gdoc['DYJetsToLL'] = {
     'use': True,
     'priority': 'high',
@@ -47,10 +15,55 @@ samples_gdoc['DYJetsToLL'] = {
     }
 
 samples_gdoc['QCD_Pt'] = {
-    'transferred_unchecked': False,
     'use': True,
     'priority': 'low'
     }
+
+samples_gdoc['ST_'] = {
+    'use': True,
+    'priority': 'high',
+    'samples': ['ST_s-channel', 
+        'ST_t-channel_top', 'ST_t-channel_antitop', 
+        'ST_tW_antitop', 'ST_tW_top']
+}
+
+samples_gdoc['TTTo2L2Nu'] = {
+    'use': True,
+    'priority': 'high'
+}
+samples_gdoc['TTWJetsToQQ'] = {
+    'use': True,
+    'priority': 'low'
+}
+samples_gdoc['WWToLNuQQ'] = {
+    'use': True,
+    'priority': 'high'
+}
+
+samples_gdoc['WLLJJToLNu'] = {'transferred_unchecked': True}
+samples_gdoc['WZTo1L1Nu2Q'] = {'transferred_unchecked': True}
+samples_gdoc['WZTo2L2Q'] = {'transferred_unchecked': True}
+samples_gdoc['WWTo2L2Nu'] = {'transferred_unchecked': True}
+samples_gdoc['WWTo2L2Nu_aTGC'] = {'transferred_unchecked': True}
+samples_gdoc['bbHToWWTo2L2Nu_M125_yb2'] = {'transferred_unchecked': True}
+samples_gdoc['bbHToWWTo2L2Nu_M125_yb2'] = {'transferred_unchecked': True}
+samples_gdoc['GluGluWWTo2L2Nu'] = {'transferred_unchecked': True}
+samples_gdoc['TTToSemiLepton'] = {'transferred_unchecked': True}
+samples_gdoc['TTWJetsToLNu'] = {'transferred_unchecked': True}
+samples_gdoc['Wg_AMCNLOFXFX'] = {'transferred_unchecked': True}
+samples_gdoc['Wg_MADGRAPHMLM'] = {'transferred_unchecked': True}
+samples_gdoc['WgStarLNuEE'] = {'transferred_unchecked': True}
+samples_gdoc['WgStarLNuMuMu'] = {'transferred_unchecked': True}
+samples_gdoc['WJetsToLNu'] = {'transferred_unchecked': True}
+samples_gdoc['WGJJ'] = {'transferred_unchecked': True}
+samples_gdoc['WZ'] = {'transferred_unchecked': True}
+samples_gdoc['WZTo1L3Nu'] = {'transferred_unchecked': True}
+samples_gdoc['WZJJ_EWK_QCD'] = {'transferred_unchecked': True}
+samples_gdoc['WWW'] = {'transferred_unchecked': True}
+samples_gdoc['WWZ'] = {'transferred_unchecked': True}
+samples_gdoc['WZZ'] = {'transferred_unchecked': True}
+samples_gdoc['ZZTo2L2Q'] = {'transferred_unchecked': True}
+samples_gdoc['ZZZ'] = {'transferred_unchecked': True}
 
 samples_gdoc['ggZH_HToWW'] = {'transferred_unchecked': False}
 samples_gdoc['ggZZ2e2m'] = {'transferred_unchecked': False}
@@ -125,7 +138,6 @@ samples_gdoc['WpWmJJ_EWK_QCD_noTop_noHiggs'] = {'transferred_unchecked': False}
 samples_gdoc['DYJetsToEE'] = {'transferred_unchecked': False}
 samples_gdoc['DYJetsToTT'] = {'transferred_unchecked': False}
 
-samples_gdoc['WWToLNuQQ']    = {'transferred_unchecked': False}
 samples_gdoc['WWToLNuQQext'] = {'transferred_unchecked': False}
 samples_gdoc['WWTo4Q']       = {'transferred_unchecked': False}
 
@@ -136,10 +148,7 @@ samples_gdoc['ZZ']         = {'transferred_unchecked': False}
 
 samples_gdoc['ggZZ2m2t']   = {'transferred_unchecked': False}
 
-samples_gdoc['ST_t-channel']         = {'transferred_unchecked': False}
-samples_gdoc['ST_tW_antitop_noHad']  = {'transferred_unchecked': False}
-samples_gdoc['ST_tW_top_noHad']      = {'transferred_unchecked': False}
-samples_gdoc['TT']                           = {'transferred_unchecked': False}
+samples_gdoc['TT_']                           = {'transferred_unchecked': False}
 samples_gdoc['TTJets']                       = {'transferred_unchecked': False}
 samples_gdoc['TTToSemiLeptonic'] = {'transferred_unchecked': False}
 
