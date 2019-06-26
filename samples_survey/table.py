@@ -112,7 +112,7 @@ if __name__ == '__main__':
         f.write('''</body>
         </html>''')
 
-    # color with green backgroud the True cells
+    # color the output table
     with open('samples_nocolor.html', 'r') as input_file, open('samples.html', 'w') as output_file:
         for line in input_file:
             if line.strip() == '<td>True</td>':
