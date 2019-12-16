@@ -1,0 +1,5 @@
+This script are used to extract a shape reweighiting for a generic variable. 
+
+The script **reweight_variable.py** extract bin by bin scale factors and errors. 
+The script **fit_reweighting.py** fits the correction and extrapolate them in all the range.
+This has been used to *nvtx* correction. 
