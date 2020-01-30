@@ -72,10 +72,6 @@ export NVTX_ROOTFILE_SOURCE=/eos/user/d/dvalsecc/www/VBSPlots/FullRun2/full2017_
 export NVTX_DATADIR=./reweight_data/
 
 # Zmm weights
-python reweight_ratiodatamc_onesample.py \
-  --file ${NVTX_ROOTFILE_SOURCE} \
-  --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu.txt \
-  --var deltaeta_vbs --cat lowen_CR_looseVBS_mu --samples DY top VVV VV VBF-V Fake --sample-to-reweight Wjets
 
   python reweight_ratiodatamc_onesample.py \
   --file ${NVTX_ROOTFILE_SOURCE} \
@@ -97,7 +93,7 @@ python reweight_ratiofit.py \
 --input ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_ele.txt \
   --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_ele_fit.txt \
   --constscale ${NVTX_DATADIR}corr_factor_deltavbs_ele.txt \
-> --output_scaled ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_ele_fit_scaled.txt
+ --output_scaled ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_ele_fit_scaled.txt
 
 
 python -i reweight_closure_onesample.py  --file ${NVTX_ROOTFILE_SOURCE} \
@@ -108,15 +104,35 @@ python -i reweight_closure_onesample.py  --file ${NVTX_ROOTFILE_SOURCE} \
   --input-weight-scaled reweight_data/reweight_ratiodatamc_wjets_deltaetavbs_ele_fit_scaled.txt
 
 #### muon 
+python reweight_ratiodatamc_onesample.py \
+  --file ${NVTX_ROOTFILE_SOURCE} \
+  --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu.txt \
+  --var deltaeta_vbs --cat lowen_CR_looseVBS_mu --samples DY top VVV VV VBF-V Fake --sample-to-reweight Wjets
 
 python reweight_ratiofit.py \
   --input ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu.txt \
   --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt
 
-python -i reweight_closure_onesample.py  --file ${NVTX_ROOTFILE_SOURCE} --input-weight reweight_data/reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt --output-norm reweight_data/corr_factor_deltavbs_mu.txt --var deltaeta_vbs --samples DY top VVV VV VBF-V Fake --sample-to-reweight Wjets
+python reweight_ratiofit.py \
+  --input ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu.txt \
+  --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt
+
+python -i reweight_closure_onesample.py  --file ${NVTX_ROOTFILE_SOURCE} \
+  --input-weight reweight_data/reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt \
+  --output-norm reweight_data/corr_factor_deltavbs_mu.txt \
+  --var deltaeta_vbs --samples DY top VVV VV VBF-V Fake \
+  --sample-to-reweight Wjets --cat lowen_CR_wjets_mu
 
 python reweight_ratiofit.py \
 --input ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu.txt \
-  --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt
-  --constscale ${NVTX_DATADIR}corr_factor_deltavbs_mu.txt
+  --output ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt \
+  --constscale ${NVTX_DATADIR}corr_factor_deltavbs_mu.txt \
+ --output_scaled ${NVTX_DATADIR}reweight_ratiodatamc_wjets_deltaetavbs_mu_fit_scaled.txt
 
+
+python -i reweight_closure_onesample.py  --file ${NVTX_ROOTFILE_SOURCE} \
+  --input-weight reweight_data/reweight_ratiodatamc_wjets_deltaetavbs_mu_fit.txt \
+  --output-norm reweight_data/corr_factor_deltavbs_mu.txt\
+  --var deltaeta_vbs --samples DY top VVV VV VBF-V Fake \
+  --sample-to-reweight Wjets --cat lowen_CR_wjets_mu\
+  --input-weight-scaled reweight_data/reweight_ratiodatamc_wjets_deltaetavbs_mu_fit_scaled.txt
