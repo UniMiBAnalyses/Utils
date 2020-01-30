@@ -3,6 +3,7 @@
 '''
 
 import ROOT as R 
+import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -12,17 +13,40 @@ parser.add_argument("--output", type=str, help="Output File: Unsafe normalizatio
 parser.add_argument("--output_scaled", type=str, help="Output File: Correct normalization weights")
 args = parser.parse_args()
 
+
 c1 = R.TCanvas( 'c1', 'rew', 0, 60, 800, 600 )
-g = R.TGraphErrors(args.input)
+g = R.TGraphErrors()
 g.SetTitle("data-MC ratio")
 g.SetMarkerStyle(7)
 g.SetMarkerSize(3)
-g.GetXaxis().SetTitle("nvtx")
+g.GetXaxis().SetTitle("Var")
 g.GetYaxis().SetTitle("data-MC ratio")
-g.GetYaxis().SetRangeUser(0,200)
+#g.GetYaxis().SetRangeUser(0,200)
 g.Draw("AP")
 
-ranges=[(5,65)]
+bins = []
+xs = []
+ys = []
+i = 0
+deltax = 0.1
+with open(args.input) as inputfile:
+    ls = inputfile.readlines()
+    for l in ls:
+        data = list(map(float,l.split(" ")))
+        x = data[0]
+        y = data[1]
+        errx = data[2]
+        erry = data[3]
+        # using the bin center for the fit
+        g.SetPoint(i, x+deltax, y)
+        g.SetPointError(i,  errx, erry)
+        i+=1
+        xs.append(x+deltax)
+        bins.append(x)
+        print(l)
+
+
+ranges=[(2,8)]
 
 func1 = R.TF1("wf1", "pol5", ranges[0][0], ranges[0][1])
 func1.SetLineWidth(3)
@@ -33,24 +57,16 @@ func_extrapolate.SetLineStyle(9)
 func_extrapolate.SetLineWidth(3)
 func_extrapolate.Draw("same")
 
-line1 = R.TLine(ranges[0][0],0,ranges[0][0],200)
-line1.SetLineColor(R.kBlack)
-line1.Draw()
-line2 = R.TLine(ranges[0][1],0,ranges[0][1],200)
-line2.SetLineColor(R.kBlack)
-line2.Draw()
 
-
-xs = []
-ys = []
 # estrapolate from 0 to 100
-for x in range(0, 101):
+ys = []
+
+for x  in xs:
     ys.append(func1.Eval(x))
-    xs.append(x)
 
 with open(args.output, "w") as out:
-    for x,y in zip(xs, ys):
-        out.write("{:.0f} {}\n".format(x,y)) 
+    for x,y in zip(bins, ys):
+        out.write("{:.4f} {}\n".format(x,y)) 
 
 try:
     with open(args.constscale, 'r') as f:
@@ -59,8 +75,8 @@ try:
     ys = [y / k for y in ys]
 
     with open(args.output_scaled, "w") as out:
-        for x,y in zip(xs, ys):
-            out.write("{:.0f} {}\n".format(x,y)) 
+        for x,y in zip(bins, ys):
+            out.write("{} {}\n".format(x,y)) 
 except Exception as e:
     print ("Not saved correctly-normalized weights: " + str(e))
 
