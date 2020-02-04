@@ -172,6 +172,68 @@ leg1.AddEntry(reweight_hist2, args.sample_to_reweight+" reweighted", "l")
 leg1.AddEntry(reweight_hist3, args.sample_to_reweight+" reweighted (norm corr)", "l")
 c1.Draw()
 
+##################################
+#  Ratio plot
+h3 = data_hist.Clone("h3")
+h3.SetLineColor(R.kBlack)
+h3.SetMarkerStyle(21)
+h3.SetTitle("")
+h3.SetMinimum(0.8)
+h3.SetMaximum(1.35)
+# Set up plot for markers and errors
+h3.Sumw2()
+h3.SetStats(0)
+h3.Divide(reweight_hist3)
+
+# Adjust y-axis settings
+y = h3.GetYaxis()
+y.SetTitle("ratio data / mc ")
+y.SetNdivisions(505)
+y.SetTitleSize(20)
+y.SetTitleFont(43)
+y.SetTitleOffset(1.55)
+y.SetLabelFont(43)
+y.SetLabelSize(15)
+
+# Adjust x-axis settings
+x = h3.GetXaxis()
+x.SetTitleSize(20)
+x.SetTitleFont(43)
+x.SetTitleOffset(4.0)
+x.SetLabelFont(43)
+x.SetLabelSize(15)
+
+# def canvas
+c3 = R.TCanvas("c3", "canvas", 800, 800)
+# Upper histogram plot is pad1
+pad1 = R.TPad("pad1", "pad1", 0, 0.3, 1, 1.0)
+pad1.SetBottomMargin(0)  # joins upper and lower plot
+pad1.SetGridx()
+pad1.Draw()
+# Lower ratio plot is pad2
+c3.cd()  # returns to main canvas before defining pad2
+pad2 = R.TPad("pad2", "pad2", 0, 0.05, 1, 0.3)
+pad2.SetTopMargin(0)  # joins upper and lower plot
+pad2.SetBottomMargin(0.2)
+pad2.SetGridx()
+pad2.Draw()
+
+# draw everything
+pad1.cd()
+reweight_hist3.Draw()
+data_hist.Draw("same")
+# to avoid clipping the bottom zero, redraw a small axis
+reweight_hist3.GetYaxis().SetLabelSize(0.0)
+axis = R.TGaxis(-5, 20, -5, 220, 20, 220, 510, "")
+axis.SetLabelFont(43)
+axis.SetLabelSize(15)
+axis.Draw()
+pad2.cd()
+h3.Draw("ep")
+
+
+
+
 
 ##################################
 # Output file 
