@@ -1,0 +1,8 @@
+Samples: Data,DY,top,VV,VVV,VBF-V,Fake
+Sample to reweight: Wjets
+Cat: res_wjetcr_mjjincl_mu
+Var: vjet_0_pt
+Fit func: pol5
+Fit range: [30.0, 500.0]
+Integral ratio after 1st iteration: 1.0003716390547472
+Integral ratio after 2st iteration (normalization): 1.0000012241015124
