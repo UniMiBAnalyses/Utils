@@ -6,8 +6,8 @@ import sys
 from itertools import product
 from array import array
 
-inputfile = R.TFile("output_fit.root", "read")
-outputfile = R.TFile("output_eff.root", "recreate")
+inputfile = R.TFile(sys.argv[1], "read")
+outputfile = R.TFile(sys.argv[2], "recreate")
 #outputdir = "/eos/user/d/dvalsecc/www/VBSPlots/2017_checks/fake_rate_correction/"
 outputdir = "."
 cache = []

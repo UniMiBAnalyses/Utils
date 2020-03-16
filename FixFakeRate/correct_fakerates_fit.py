@@ -7,8 +7,10 @@ from itertools import product
 from array import array
 from math import sqrt
 
-inputfile = R.TFile("output_graph.root", "read")
-outputfile = R.TFile("output_fit.root", "recreate")
+
+
+inputfile = R.TFile(sys.argv[1], "read")
+outputfile = R.TFile(sys.argv[2], "recreate")
 outputdir = "."
 cache = []
 
@@ -49,6 +51,7 @@ for i in range(1, 11):
     # f.SetParameter(2, 10)
     # f.SetParLimits(3, -0.5, 0.5)
     # f.SetParameter(4, 0.1)
+
     # g.Fit(f,"S", "", 38, 160)
     f = R.TF1("f_A_T_etabin{}".format(i), "[0] + [1]*TMath::Erf((x-[2])/ [3])", 38, 160)
     f.SetParameter(1, 0.8)

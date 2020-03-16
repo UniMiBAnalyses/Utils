@@ -5,19 +5,18 @@ import os
 import sys
 from itertools import product
 
-
-A_loose = R.TFile("2017_trigger_eff/Ele35_pt_eta_EGM_2017Bv6_onlyLoosenominal_efficiency.root")
-A_tight = R.TFile("2017_trigger_eff/Ele35_pt_eta_EGM_2017Bv6_nominal_efficiency.root")
-B_loose = R.TFile("2017_trigger_eff/Ele23_Ele12_leg1_pt_eta_EGM_2017Bv6_onlyLoosenominal_efficiency.root")
-B_tight = R.TFile("2017_trigger_eff/Ele23_Ele12_leg1_pt_eta_EGM_2017Bv6_nominal_efficiency.root")
+A_loose = R.TFile("2018_trigger_eff/results_Ele_looseOnly/Ele32_pt_eta/Ele32_pt_eta_2018_EGM_looseid_nominal_efficiency.root")
+A_tight = R.TFile("2018_trigger_eff/results_Ele_tight/Ele32_pt_eta/Ele32_pt_eta_2018_EGM_newWPnominal_efficiency.root")
+B_loose = R.TFile("2018_trigger_eff/results_Ele_looseOnly/Ele23_Ele12_leg1_pt_eta/Ele23_Ele12_leg1_pt_eta_2018_EGM_looseid_nominal_efficiency.root")
+B_tight = R.TFile("2018_trigger_eff/results_Ele_tight/Ele23_Ele12_leg1_pt_eta/Ele23_Ele12_leg1_pt_eta_2018_EGM_newWPnominal_efficiency.root")
 
 print ("Aloose",[p for p in A_loose.c.GetListOfPrimitives()])
 print ("Atight",[p for p in A_tight.c.GetListOfPrimitives()])
 print ("Bloose",[p for p in B_loose.c.GetListOfPrimitives()])
 print ("Btight",[p for p in B_tight.c.GetListOfPrimitives()])
 
-eff_A_L = A_loose.c.GetPrimitive("Ele35_pt_eta_total_clone")
-eff_A_T = A_tight.c.GetPrimitive("Ele35_pt_eta_total_clone")
+eff_A_L = A_loose.c.GetPrimitive("Ele32_pt_eta_total_clone")
+eff_A_T = A_tight.c.GetPrimitive("Ele32_pt_eta_total_clone")
 eff_B_L = B_loose.c.GetPrimitive("Ele23_Ele12_leg1_pt_eta_total_clone")
 eff_B_T = B_tight.c.GetPrimitive("Ele23_Ele12_leg1_pt_eta_total_clone")
 
@@ -41,7 +40,7 @@ binsY_A = h_A_L.GetNbinsY()
 binsY_B = h_B_L.GetNbinsY()
 
 
-outputfile = R.TFile("output_graph.root", "recreate")
+outputfile = R.TFile("output_graph_2018.root", "recreate")
 
 bypt = {}
 

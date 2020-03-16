@@ -1,0 +1,6 @@
+
+
+To compute the ratio directly from histograms run:   *correct_fakerates_year_histo.py*
+
+To fit the turn on curve and then extrapolate the efficiency by eta bins:  *correct_fakerates_fit.py*
+
