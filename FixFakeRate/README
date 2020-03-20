@@ -2,5 +2,7 @@
 
 To compute the ratio directly from histograms run:   *correct_fakerates_year_histo.py*
 
-To fit the turn on curve and then extrapolate the efficiency by eta bins:  *correct_fakerates_fit.py*
+To fit the turn on curve and then extrapolate the efficiency by eta bins:
+ - first run the correct_fakerates_graph script to produce turn on curves
+ - then use  *correct_fakerates_fit.py* to fit the curves and produce R factor plots.
 

@@ -6,15 +6,18 @@ import sys
 from itertools import product
 from array import array
 from math import sqrt
+R.gROOT.SetBatch(True)
 
-
+outputdir = sys.argv[3]
 
 inputfile = R.TFile(sys.argv[1], "read")
-outputfile = R.TFile(sys.argv[2], "recreate")
-outputdir = "."
+outputfile = R.TFile(outputdir +"/"+ sys.argv[2], "recreate")
+
 cache = []
 
 fit_results = {}
+
+xfit = [32,35, 30,35,35,35,32,30,35,30]
 
 for i in range(1, 11):  
     g = inputfile.Get("eff_A_L_etabin{}".format(i))
@@ -24,20 +27,22 @@ for i in range(1, 11):
     # f.SetParameter(2, 10)
     # f.SetParLimits(3, -0.5, 0.5)
     # f.SetParameter(4, 0.1)
-    # g.Fit(f,"S", "", 38, 160)
-    f = R.TF1("f_A_L_etabin{}".format(i), "[0] + [1]*TMath::Erf((x-[2])/ [3])", 38, 160)
-    f.SetParameter(1, 0.7)
-    f.SetParameter(2, 30)
-    f.SetParameter(3, 10)
-    result = g.Fit(f,"S", "", 38, 120)
+    # g.Fit(f,"SB", "", 38, 160)
+    f = R.TF1("f_A_L_etabin{}".format(i), "[0]*TMath::Erf((x-[1])/ [2])", 30, 160)
+    f.SetParameter(0, 0.9)
+    f.SetParameter(1, 30)
+    f.SetParLimits(1, 20,40)
+    f.SetParameter(2, 10)    
+    result = g.Fit(f,"SB", "", xfit[i-1], 160)
     result.SetName("fit_result_A_L_etabin{}".format(i))
     #result.Write()
 
-    # c = R.TCanvas()
-    # g.Draw("APF")
-    # g.SetMarkerStyle(2)
-    # c.Draw()
-    # cache.append((c,g))
+    c = R.TCanvas()
+    g.Draw("APF")
+    g.SetMarkerStyle(2)
+    c.Draw()
+    c.SaveAs(outputdir+"/"+g.GetName()+".png")
+    cache.append((c,g))
     f.Print()
     g.Write()
     f.Write()
@@ -45,27 +50,24 @@ for i in range(1, 11):
 
 for i in range(1, 11):  
     g = inputfile.Get("eff_A_T_etabin{}".format(i))
-    # f = R.TF1("f_A_T_etabin{}".format(i), "[0] / ( 1 + TMath::Exp((-1)* (x-[1])/ [2]) ) + x*[3] + [4]", 38, 160)
-    # f.SetParameter(0, 0.8)
-    # f.SetParameter(1, 30)
-    # f.SetParameter(2, 10)
-    # f.SetParLimits(3, -0.5, 0.5)
-    # f.SetParameter(4, 0.1)
 
-    # g.Fit(f,"S", "", 38, 160)
-    f = R.TF1("f_A_T_etabin{}".format(i), "[0] + [1]*TMath::Erf((x-[2])/ [3])", 38, 160)
-    f.SetParameter(1, 0.8)
-    f.SetParameter(2, 30)
-    f.SetParameter(3, 10)
-    result = g.Fit(f,"S", "", 38, 120)
+    # g.Fit(f,"SB", "", 38, 160)
+    f = R.TF1("f_A_T_etabin{}".format(i), "[0]*TMath::Erf((x-[1])/ [2])", 30, 160)
+    f.SetParameter(0, 0.9)
+    f.SetParameter(1, 30)
+    f.SetParLimits(1, 20,40)
+    f.SetParameter(2, 10)
+    
+    result = g.Fit(f,"SB", "", xfit[i-1], 160)
     result.SetName("fit_result_A_T_etabin{}".format(i))
     #result.Write()
 
-    # c = R.TCanvas()
-    # g.Draw("APF")
-    # g.SetMarkerStyle(2)
-    # c.Draw()
-    # cache.append((c,g))
+    c = R.TCanvas()
+    g.Draw("APF")
+    g.SetMarkerStyle(2)
+    c.Draw()
+    c.SaveAs(outputdir+"/"+g.GetName()+".png")
+    cache.append((c,g))
 
     f.Print()
     g.Write()
@@ -76,24 +78,23 @@ for i in range(1, 11):
 
 for i in range(1,11):  
     g = inputfile.Get("eff_B_L_etabin{}".format(i))
-    # f = R.TF1("f_B_L_etabin{}".format(i), "[0] / ( 1 + TMath::Exp((-1)* (x-[1])/ [2]) ) + x*[3] + [4]", 30, 160)
-    # f.SetParameter(0, 0.9)
-    # f.SetParameter(1, 25)
-    # f.SetParameter(2, 10)
-    # f.SetParLimits(3, -0.5, 0.5)
-    # g.Fit(f,"S", "", 30, 160)
-    f = R.TF1("f_B_L_etabin{}".format(i), "[0] + [1]*TMath::Erf((x-[2])/ [3])", 30, 160)
-    f.SetParameter(1, 0.8)
-    f.SetParameter(2, 25)
-    f.SetParameter(3, 10)
-    result = g.Fit(f,"S", "", 30, 120)
+
+    f = R.TF1("f_B_L_etabin{}".format(i), "[0]*TMath::Erf((x-[1])/ [2])", 30, 160)
+    f.SetParameter(0, 0.9)
+    f.SetParameter(1, 30)
+    f.SetParLimits(1, 20,40)
+    f.SetParameter(2, 10)
+    
+    result = g.Fit(f,"SB", "", xfit[i-1], 160)
     result.SetName("fit_result_B_L_etabin{}".format(i))
     result.Write()
-    # c = R.TCanvas()
-    # g.Draw("APF")
-    # g.SetMarkerStyle(2)
-    # c.Draw()
-    # cache.append((c,g))
+    
+    c = R.TCanvas()
+    g.Draw("APF")
+    g.SetMarkerStyle(2)
+    c.Draw()
+    c.SaveAs(outputdir+"/"+g.GetName()+".png")
+    cache.append((c,g))
     f.Print()
     g.Write()
     f.Write()
@@ -101,24 +102,22 @@ for i in range(1,11):
 
 for i in range(1,11):  
     g = inputfile.Get("eff_B_T_etabin{}".format(i))
-    # f = R.TF1("f_B_T_etabin{}".format(i), "[0] / ( 1 + TMath::Exp((-1)* (x-[1])/ [2]) ) + x*[3] + [4]", 30, 160)
-    # f.SetParameter(0, 0.9)
-    # f.SetParameter(1, 25)
-    # f.SetParameter(2, 10)
-    # f.SetParLimits(3, -0.5, 0.5)
-    # g.Fit(f,"S", "", 30, 160)
-    f = R.TF1("f_B_T_etabin{}".format(i), "[0] + [1]*TMath::Erf((x-[2])/ [3])", 30, 160)
-    f.SetParameter(1, 0.9)
-    f.SetParameter(2, 25)
-    f.SetParameter(3, 10)
-    result = g.Fit(f,"S", "", 30, 120)
+
+    f = R.TF1("f_B_T_etabin{}".format(i), "[0]*TMath::Erf((x-[1])/ [2])", 30, 160)
+    f.SetParameter(0, 0.9)
+    f.SetParameter(1, 30)
+    f.SetParLimits(1, 20,40)
+    f.SetParameter(2, 10)
+    result = g.Fit(f,"SB", "", 35, 160)
     result.SetName("fit_result_B_T_etabin{}".format(i))
     result.Write()
-    # c = R.TCanvas()
-    # g.Draw("APF")
-    # g.SetMarkerStyle(2)
-    # c.Draw()
-    # cache.append((c,g))
+    
+    c = R.TCanvas()
+    g.Draw("APF")
+    g.SetMarkerStyle(2)
+    c.Draw()
+    c.SaveAs(outputdir+"/"+g.GetName()+".png")
+    cache.append((c,g))
     f.Print()
     g.Write()
     f.Write()
@@ -207,11 +206,10 @@ for etab in range(1,11):
     cache.append((c,g))
     g.Write()
     c.SaveAs(outputdir+"/"+ g.GetName()+".png")
-    if etab not in [3,8]: 
-        mg.Add(g)
-        mgL.Add(gL)
-        mgT.Add(gT)
-        leg.AddEntry(g, "eta: {}-{}".format( etabins[etab-1], etabins[etab]))
+    mg.Add(g)
+    mgL.Add(gL)
+    mgT.Add(gT)
+    leg.AddEntry(g, "eta: {}-{}".format( etabins[etab-1], etabins[etab]))
 
 c = R.TCanvas()
 R.gPad.SetLeftMargin(1.3)
